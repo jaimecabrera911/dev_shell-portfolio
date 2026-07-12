@@ -752,7 +752,7 @@ func main() {
             </div>
             <div>
               <h1 className="font-display text-sm font-bold tracking-tight text-on-surface">
-                DEV_SHELL Admin
+                JaiCab Admin
               </h1>
               <p className="text-[10px] font-mono text-primary uppercase font-bold tracking-widest">
                 Dashboard
@@ -829,7 +829,7 @@ func main() {
               <div className="flex items-center justify-between pb-6 border-b border-outline-variant/10">
                 <div className="flex items-center gap-2">
                   <Terminal className="w-4.5 h-4.5 text-primary" />
-                  <span className="font-display font-bold text-xs uppercase text-on-surface">DEV_SHELL PANEL</span>
+                  <span className="font-display font-bold text-xs uppercase text-on-surface">JaiCab PANEL</span>
                 </div>
                 <button onClick={() => setMobileSidebarOpen(false)} className="text-on-surface-variant hover:text-on-surface">
                   <X className="w-5 h-5" />

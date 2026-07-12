@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -5,6 +7,7 @@
 
 import { ArrowUp, Terminal } from 'lucide-react';
 import Link from 'next/link';
+import TypewriterLogo from './TypewriterLogo';
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -20,10 +23,11 @@ export default function Footer() {
         {/* Left Column Logo */}
         <div 
           onClick={scrollToTop}
-          className="font-display text-xl font-bold text-primary tracking-tighter cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
           id="footer-logo"
         >
-          DEV_SHELL
+          <img src="/logo.png" alt="JaiCabDev Logo" className="w-12 h-12 object-contain rounded-md" />
+          <TypewriterLogo className="text-lg font-black tracking-tight text-on-surface" />
         </div>
 
         {/* Middle/Right Column Links */}
@@ -56,7 +60,7 @@ export default function Footer() {
           </div>
 
           <p className="font-mono text-[10px] text-on-surface-variant">
-            © 2026 DEV_SHELL. Built for performance.
+            © 2026 JaiCab. Built for performance.
           </p>
 
           <button

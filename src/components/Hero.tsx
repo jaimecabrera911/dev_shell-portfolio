@@ -10,13 +10,14 @@ interface HeroProps {
   onResumeClick: () => void;
   pdfBase64?: string;
   pdfFileName?: string;
+  name?: string;
   title?: string;
   availability?: string;
   certifications?: CertificationItem[];
   subtitle?: string;
 }
 
-export default function Hero({ onResumeClick, pdfBase64, pdfFileName, title, availability, certifications, subtitle }: HeroProps) {
+export default function Hero({ onResumeClick, pdfBase64, pdfFileName, name, title, availability, certifications, subtitle }: HeroProps) {
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -58,6 +59,11 @@ export default function Hero({ onResumeClick, pdfBase64, pdfFileName, title, ava
               className="font-display text-4xl md:text-6xl font-bold tracking-tighter text-on-surface mb-6 leading-tight"
               id="hero-headline"
             >
+              {name && (
+                <span className="font-mono text-3xl md:text-5xl font-black text-primary block mb-4 tracking-tight leading-none" style={{ textShadow: '0 0 40px rgba(192,193,255,0.4), 0 0 80px rgba(192,193,255,0.2)' }}>
+                  {name}
+                </span>
+              )}
               {(() => {
                 const displayTitle = title || 'Fullstack Developer & Solutions Architect';
                 if (displayTitle.includes('&')) {

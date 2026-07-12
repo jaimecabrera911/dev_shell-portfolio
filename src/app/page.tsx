@@ -48,6 +48,7 @@ export default function Home() {
           onResumeClick={() => setShowResume(true)} 
           pdfBase64={resumeData.pdfBase64} 
           pdfFileName={resumeData.pdfFileName} 
+          name={resumeData.name}
           title={resumeData.title}
           availability={resumeData.availability}
           certifications={resumeData.certifications}

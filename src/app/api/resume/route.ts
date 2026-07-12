@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     const result = await db.select().from(resumeData).where(eq(resumeData.id, 'main'));
     
     const values = {
-      name: body.name || 'DEV_SHELL',
+      name: body.name || 'JaiCab',
       title: body.title,
       email: body.email,
       base: body.base,

@@ -1,8 +1,8 @@
 import '../index.css';
 
 export const metadata = {
-  title: 'DEV_SHELL | Fullstack Developer & Solutions Architect',
-  description: 'High-performance, technical, and sophisticated portfolio website for a Fullstack Developer & Solutions Architect.',
+  title: 'JaiCab | Fullstack Developer',
+  description: 'High-performance, technical, and sophisticated portfolio website for a Fullstack Developer.',
 };
 
 export const viewport = {
@@ -18,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
       </head>
       <body>

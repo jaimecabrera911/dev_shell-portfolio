@@ -7,6 +7,7 @@
  
 import { useState, useEffect } from 'react';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
+import TypewriterLogo from './TypewriterLogo';
 
 interface TopNavBarProps {
   onResumeClick: () => void;
@@ -63,10 +64,11 @@ export default function TopNavBar({ onResumeClick }: TopNavBarProps) {
         {/* Logo */}
         <div 
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="font-display text-2xl font-bold text-primary tracking-tighter cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
           id="nav-logo"
         >
-          DEV_SHELL
+          <img src="/logo.png" alt="JaiCabDev Logo" className="w-16 h-16 object-contain rounded-md" />
+          <TypewriterLogo className="text-xl font-black tracking-tight text-on-surface" />
         </div>
 
         {/* Desktop Navigation Links */}
