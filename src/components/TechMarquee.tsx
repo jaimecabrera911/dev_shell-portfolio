@@ -13,45 +13,113 @@ import {
   Server, Box, Cloud, Globe, Terminal, Network, Github 
 } from 'lucide-react';
 
-const getTechIcon = (iconName: string) => {
-  switch (iconName) {
-    case 'Javascript': return Code;
-    case 'Typescript': return Shield;
-    case 'React':
-    case 'ReactNative': return Cpu;
-    case 'Node': return Server;
-    case 'Postgres': return Database;
-    case 'Docker': return Box;
-    case 'Aws': return Cloud;
-    case 'Next': return Globe;
-    case 'Go': return Terminal;
-    case 'Redis': return HardDrive;
-    case 'Graphql': return Network;
-    case 'Kubernetes': return Layers;
-    case 'Github': return Github;
-    default: return Layers;
+export const getDeviconClass = (iconName: string) => {
+  const normalized = iconName.trim().toLowerCase();
+  
+  // Custom manual mappings
+  if (normalized === 'reactnative' || normalized === 'react native') {
+    return 'devicon-react-original colored';
   }
+  if (normalized === 'aws' || normalized === 'amazon web services') {
+    return 'devicon-amazonwebservices-plain-wordmark colored';
+  }
+  if (normalized === 'next' || normalized === 'next.js' || normalized === 'nextjs') {
+    return 'devicon-nextjs-plain';
+  }
+  if (normalized === 'go' || normalized === 'golang') {
+    return 'devicon-go-original-wordmark colored';
+  }
+  if (normalized === 'cplusplus' || normalized === 'c++') {
+    return 'devicon-cplusplus-plain colored';
+  }
+  if (normalized === 'node' || normalized === 'nodejs') {
+    return 'devicon-nodejs-plain colored';
+  }
+  if (normalized === 'postgres' || normalized === 'postgresql') {
+    return 'devicon-postgresql-plain colored';
+  }
+  if (normalized === 'mysql') {
+    return 'devicon-mysql-plain colored';
+  }
+  if (normalized === 'mongodb') {
+    return 'devicon-mongodb-plain colored';
+  }
+  if (normalized === 'firebase') {
+    return 'devicon-firebase-plain colored';
+  }
+  if (normalized === 'sqlite') {
+    return 'devicon-sqlite-plain colored';
+  }
+  if (normalized === 'express') {
+    return 'devicon-express-original';
+  }
+  if (normalized === 'vue' || normalized === 'vuejs') {
+    return 'devicon-vuejs-plain colored';
+  }
+  if (normalized === 'angular') {
+    return 'devicon-angularjs-plain colored';
+  }
+  if (normalized === 'tailwind' || normalized === 'tailwindcss') {
+    return 'devicon-tailwindcss-plain colored';
+  }
+  if (normalized === 'bootstrap') {
+    return 'devicon-bootstrap-plain colored';
+  }
+  if (normalized === 'sass') {
+    return 'devicon-sass-original colored';
+  }
+  
+  // If it already has a Devicon style suffix (plain, original, line, wordmark, etc.)
+  if (
+    normalized.includes('-plain') || 
+    normalized.includes('-original') || 
+    normalized.includes('-line') || 
+    normalized.includes('-wordmark')
+  ) {
+    const baseClass = normalized.startsWith('devicon-') ? normalized : `devicon-${normalized}`;
+    const needsColored = !normalized.includes('github') && !normalized.includes('nextjs');
+    return needsColored ? `${baseClass} colored` : baseClass;
+  }
+  
+  // Default fallback
+  return `devicon-${normalized}-plain colored`;
 };
 
-const getTechIconColor = (iconName: string) => {
-  switch (iconName) {
-    case 'Javascript': return 'text-yellow-400/90';
-    case 'Typescript': return 'text-blue-400/90';
-    case 'React':
-    case 'ReactNative': return 'text-cyan-400/90';
-    case 'Node': return 'text-green-400/90';
-    case 'Postgres': return 'text-indigo-400/90';
-    case 'Docker': return 'text-blue-500/90';
-    case 'Aws': return 'text-orange-400/90';
-    case 'Next': return 'text-white';
-    case 'Go': return 'text-sky-400/90';
-    case 'Redis': return 'text-red-400/90';
-    case 'Graphql': return 'text-pink-400/90';
-    case 'Kubernetes': return 'text-blue-600/90';
-    case 'Github': return 'text-gray-300/90';
-    default: return 'text-primary';
-  }
-};
+interface TechCardProps {
+  tech: TechItem;
+  idx: number;
+}
+
+function TechCard({ tech, idx }: TechCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const isCustomColor = tech.color && tech.color.trim() !== '';
+  const deviconClass = getDeviconClass(tech.icon);
+  const finalClass = isCustomColor ? deviconClass.replace('colored', '') : deviconClass;
+
+  const cardStyle = isHovered && isCustomColor 
+    ? { borderColor: `${tech.color}80`, boxShadow: `0 0 20px ${tech.color}15` } 
+    : undefined;
+
+  return (
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={cardStyle}
+      className="flex items-center gap-3 glass-card px-5 py-3 rounded-xl hover:border-primary/50 transition-all duration-300 transform hover:-translate-y-0.5 whitespace-nowrap group-hover:scale-95 hover:!scale-105"
+    >
+      <i 
+        className={`${finalClass} text-lg shrink-0`} 
+        style={isCustomColor ? { color: tech.color } : undefined}
+      />
+      <span className="font-mono text-sm text-on-surface font-medium">{tech.name}</span>
+      {tech.isCore && (
+        <span className="text-[9px] font-mono bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded uppercase font-semibold">
+          Core
+        </span>
+      )}
+    </div>
+  );
+}
 
 export interface TechMarqueeProps {
   skills?: TechItem[];
@@ -113,23 +181,9 @@ export default function TechMarquee({ skills }: TechMarqueeProps) {
 
         <div className="animate-marquee flex gap-8 items-center py-2">
           {/* Double up elements to make marquee seamless */}
-          {[...filteredStack, ...filteredStack, ...filteredStack].map((tech, idx) => {
-            const TechIcon = getTechIcon(tech.icon);
-            return (
-              <div
-                key={`${tech.name}-${idx}`}
-                className="flex items-center gap-3 glass-card px-5 py-3 rounded-xl hover:border-primary/50 transition-all duration-300 transform hover:-translate-y-0.5 whitespace-nowrap group-hover:scale-95 hover:!scale-105"
-              >
-                <TechIcon className={`w-4 h-4 ${getTechIconColor(tech.icon)}`} />
-                <span className="font-mono text-sm text-on-surface font-medium">{tech.name}</span>
-                {tech.isCore && (
-                  <span className="text-[9px] font-mono bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded uppercase font-semibold">
-                    Core
-                  </span>
-                )}
-              </div>
-            );
-          })}
+          {[...filteredStack, ...filteredStack, ...filteredStack].map((tech, idx) => (
+            <TechCard key={`${tech.name}-${idx}`} tech={tech} idx={idx} />
+          ))}
         </div>
       </div>
     </section>

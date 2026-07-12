@@ -48,6 +48,7 @@ export interface TechItem {
   icon: string;
   category: 'frontend' | 'backend' | 'devops' | 'database';
   isCore: boolean;
+  color?: string;
 }
 
 export interface ContactMessage {

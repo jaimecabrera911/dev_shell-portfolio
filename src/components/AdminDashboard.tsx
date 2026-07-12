@@ -19,6 +19,88 @@ import {
   Pencil, Save, Briefcase, Building, Code2, Rocket,
   Trophy, GraduationCap, Cpu, Server, Users, Sparkles
 } from 'lucide-react';
+import { getDeviconClass } from './TechMarquee';
+
+const DEVICON_PRESETS = [
+  // Languages
+  { value: 'Javascript', label: 'JavaScript' },
+  { value: 'Typescript', label: 'TypeScript' },
+  { value: 'Java', label: 'Java' },
+  { value: 'Python', label: 'Python' },
+  { value: 'Php', label: 'PHP' },
+  { value: 'Ruby', label: 'Ruby' },
+  { value: 'Go', label: 'Go / Golang' },
+  { value: 'Rust', label: 'Rust' },
+  { value: 'Cplusplus', label: 'C++' },
+  { value: 'Csharp', label: 'C#' },
+  { value: 'Swift', label: 'Swift' },
+  { value: 'Kotlin', label: 'Kotlin' },
+  { value: 'Scala', label: 'Scala' },
+  { value: 'Dart', label: 'Dart' },
+  { value: 'Elixir', label: 'Elixir' },
+  { value: 'Haskell', label: 'Haskell' },
+  { value: 'Lua', label: 'Lua' },
+  { value: 'R', label: 'R' },
+  { value: 'Shell', label: 'Shell / Bash' },
+  
+  // Frontend Frameworks & Libraries
+  { value: 'React', label: 'React' },
+  { value: 'ReactNative', label: 'React Native' },
+  { value: 'Next', label: 'Next.js' },
+  { value: 'Vue', label: 'Vue.js' },
+  { value: 'Angular', label: 'Angular' },
+  { value: 'Svelte', label: 'Svelte' },
+  { value: 'Tailwind', label: 'Tailwind CSS' },
+  { value: 'Bootstrap', label: 'Bootstrap' },
+  { value: 'Sass', label: 'Sass / SCSS' },
+  { value: 'HTML', label: 'HTML5' },
+  { value: 'CSS', label: 'CSS3' },
+  
+  // Backend & Servers
+  { value: 'Node', label: 'Node.js' },
+  { value: 'Express', label: 'Express.js' },
+  { value: 'Nestjs', label: 'NestJS' },
+  { value: 'Django', label: 'Django' },
+  { value: 'Flask', label: 'Flask' },
+  { value: 'Spring', label: 'Spring Boot' },
+  { value: 'Laravel', label: 'Laravel' },
+  { value: 'Rails', label: 'Ruby on Rails' },
+  
+  // Databases & Cache
+  { value: 'Postgres', label: 'PostgreSQL' },
+  { value: 'Mysql', label: 'MySQL' },
+  { value: 'Mongodb', label: 'MongoDB' },
+  { value: 'Redis', label: 'Redis' },
+  { value: 'Sqlite', label: 'SQLite' },
+  { value: 'Mariadb', label: 'MariaDB' },
+  { value: 'Oracle', label: 'Oracle DB' },
+  { value: 'Firebase', label: 'Firebase' },
+  { value: 'Supabase', label: 'Supabase' },
+  { value: 'Graphql', label: 'GraphQL' },
+  
+  // DevOps & Cloud
+  { value: 'Docker', label: 'Docker' },
+  { value: 'Kubernetes', label: 'Kubernetes' },
+  { value: 'Aws', label: 'AWS' },
+  { value: 'Azure', label: 'Azure' },
+  { value: 'Gcp', label: 'Google Cloud Platform' },
+  { value: 'Terraform', label: 'Terraform' },
+  { value: 'Ansible', label: 'Ansible' },
+  { value: 'Jenkins', label: 'Jenkins' },
+  { value: 'Nginx', label: 'Nginx' },
+  { value: 'Apache', label: 'Apache' },
+  
+  // Tools & Platforms
+  { value: 'Git', label: 'Git' },
+  { value: 'Github', label: 'GitHub' },
+  { value: 'Gitlab', label: 'GitLab' },
+  { value: 'Vscode', label: 'VS Code' },
+  { value: 'Webpack', label: 'Webpack' },
+  { value: 'Vite', label: 'Vite' },
+  { value: 'Figma', label: 'Figma' },
+  { value: 'Linux', label: 'Linux' },
+  { value: 'wordpress', label: 'WordPress' }
+];
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -127,8 +209,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   // Skills Editing States
   const [newSkillName, setNewSkillName] = useState('');
   const [newSkillIcon, setNewSkillIcon] = useState('Javascript');
+  const [iconSearchQuery, setIconSearchQuery] = useState('JavaScript');
+  const [showIconSuggestions, setShowIconSuggestions] = useState(false);
   const [newSkillCategory, setNewSkillCategory] = useState<'frontend' | 'backend' | 'database' | 'devops'>('frontend');
   const [newSkillIsCore, setNewSkillIsCore] = useState(false);
+  const [newSkillColor, setNewSkillColor] = useState('');
   const [editingSkillIndex, setEditingSkillIndex] = useState<number | null>(null);
   const [skillsFormSuccess, setSkillsFormSuccess] = useState('');
 
@@ -140,7 +225,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       name: newSkillName.trim(),
       icon: newSkillIcon,
       category: newSkillCategory,
-      isCore: newSkillIsCore
+      isCore: newSkillIsCore,
+      color: newSkillColor.trim() || undefined
     };
 
     const currentSkills = resumeForm.skills || [];
@@ -161,8 +247,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
     setNewSkillName('');
     setNewSkillIcon('Javascript');
+    setIconSearchQuery('JavaScript');
     setNewSkillCategory('frontend');
     setNewSkillIsCore(false);
+    setNewSkillColor('');
   };
 
   const handleDeleteSkill = (index: number) => {
@@ -176,8 +264,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       setEditingSkillIndex(null);
       setNewSkillName('');
       setNewSkillIcon('Javascript');
+      setIconSearchQuery('JavaScript');
       setNewSkillCategory('frontend');
       setNewSkillIsCore(false);
+      setNewSkillColor('');
     }
   };
 
@@ -189,8 +279,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setEditingSkillIndex(index);
     setNewSkillName(skill.name);
     setNewSkillIcon(skill.icon);
+    
+    // Find matching preset label for the search input
+    const preset = DEVICON_PRESETS.find(p => p.value.toLowerCase() === skill.icon.toLowerCase());
+    setIconSearchQuery(preset ? preset.label : skill.icon);
+    
     setNewSkillCategory(skill.category);
     setNewSkillIsCore(skill.isCore);
+    setNewSkillColor(skill.color || '');
   };
 
   const handleSaveSkills = async (e: React.FormEvent) => {
@@ -2232,30 +2328,67 @@ func main() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="relative">
                       <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                        Brand Icon preset
+                        Brand Icon Search
                       </label>
-                      <select
-                        value={newSkillIcon}
-                        onChange={(e) => setNewSkillIcon(e.target.value)}
-                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-mono text-on-surface transition-all cursor-pointer"
-                      >
-                        <option value="Javascript">JavaScript</option>
-                        <option value="Typescript">TypeScript</option>
-                        <option value="React">React</option>
-                        <option value="ReactNative">React Native</option>
-                        <option value="Node">Node.js</option>
-                        <option value="Postgres">PostgreSQL</option>
-                        <option value="Docker">Docker</option>
-                        <option value="Aws">AWS</option>
-                        <option value="Next">Next.js</option>
-                        <option value="Go">Go</option>
-                        <option value="Redis">Redis</option>
-                        <option value="Graphql">GraphQL</option>
-                        <option value="Kubernetes">Kubernetes</option>
-                        <option value="Github">GitHub</option>
-                      </select>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          required
+                          placeholder="Search icon (e.g. React, WordPress, Go...)"
+                          value={iconSearchQuery}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setIconSearchQuery(val);
+                            setNewSkillIcon(val); // Custom typed name goes directly to newSkillIcon
+                            setShowIconSuggestions(true);
+                          }}
+                          onFocus={() => setShowIconSuggestions(true)}
+                          onBlur={() => {
+                            setTimeout(() => setShowIconSuggestions(false), 200);
+                          }}
+                          className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all"
+                        />
+                        <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-primary">
+                          <i className={`${getDeviconClass(newSkillIcon)} text-base`} />
+                        </div>
+                      </div>
+
+                      {showIconSuggestions && (
+                        <div className="absolute left-0 right-0 mt-1.5 max-h-48 overflow-y-auto bg-surface-container-high border border-outline-variant/20 rounded-xl shadow-xl z-50 custom-scrollbar-hide animate-scale-up">
+                          {(() => {
+                            const filteredPresets = DEVICON_PRESETS.filter(p => 
+                              p.label.toLowerCase().includes(iconSearchQuery.toLowerCase()) ||
+                              p.value.toLowerCase().includes(iconSearchQuery.toLowerCase())
+                            );
+                            if (filteredPresets.length > 0) {
+                              return filteredPresets.map((p) => (
+                                <button
+                                  key={p.value}
+                                  type="button"
+                                  onMouseDown={() => {
+                                    setNewSkillIcon(p.value);
+                                    setIconSearchQuery(p.label);
+                                    setShowIconSuggestions(false);
+                                  }}
+                                  className="w-full text-left px-3.5 py-2 text-xs font-sans text-on-surface hover:bg-surface-container-highest cursor-pointer flex items-center gap-2 transition-all border-b border-outline-variant/5 last:border-b-0"
+                                >
+                                  <i className={`${getDeviconClass(p.value)} text-sm`} />
+                                  <span>{p.label}</span>
+                                  <span className="text-[10px] font-mono text-on-surface-variant/50 ml-auto">({p.value})</span>
+                                </button>
+                              ));
+                            } else {
+                              return (
+                                <div className="px-3.5 py-2.5 text-xs font-sans text-on-surface-variant italic bg-surface-container-low/50">
+                                  Pressing save will use custom name "{iconSearchQuery}"
+                                </div>
+                              );
+                            }
+                          })()}
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -2272,6 +2405,28 @@ func main() {
                         <option value="database">Database</option>
                         <option value="devops">Cloud / DevOps</option>
                       </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                      Custom Icon Color (Optional)
+                    </label>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        placeholder="e.g. #ffb783 (leave empty for default Devicon color)"
+                        value={newSkillColor}
+                        onChange={(e) => setNewSkillColor(e.target.value)}
+                        className="flex-1 bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all"
+                      />
+                      <input
+                        type="color"
+                        value={newSkillColor.startsWith('#') && newSkillColor.length === 7 ? newSkillColor : '#ffffff'}
+                        onChange={(e) => setNewSkillColor(e.target.value)}
+                        className="w-10 h-10 rounded-xl border border-outline-variant/20 bg-transparent cursor-pointer p-1 shrink-0"
+                        title="Pick color"
+                      />
                     </div>
                   </div>
 
@@ -2298,6 +2453,7 @@ func main() {
                           setNewSkillIcon('Javascript');
                           setNewSkillCategory('frontend');
                           setNewSkillIsCore(false);
+                          setNewSkillColor('');
                         }}
                         className="flex-1 bg-surface-container hover:bg-surface-container-high text-on-surface font-mono text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer active:scale-95 text-center"
                       >
@@ -2370,8 +2526,8 @@ func main() {
                                 className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-outline-variant/30 flex items-center justify-between gap-4 transition-all"
                               >
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                  <span className="font-mono text-[10px] text-on-surface-variant bg-background/50 px-2 py-0.5 rounded border border-outline-variant/10">
-                                    {skill.icon}
+                                  <span className="font-mono text-[10px] text-on-surface-variant bg-background/50 p-1.5 rounded border border-outline-variant/10 flex items-center justify-center shrink-0 w-8 h-8">
+                                    <i className={`${getDeviconClass(skill.icon)} text-base`} title={skill.icon} />
                                   </span>
                                   <div className="min-w-0">
                                     <p className="font-sans text-xs font-bold text-on-surface truncate flex items-center gap-1.5">
