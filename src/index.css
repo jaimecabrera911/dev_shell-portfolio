@@ -72,6 +72,15 @@
                     linear-gradient(to bottom, rgba(255,255,255,0.015) 1px, transparent 1px);
 }
 
+/* Hide scrollbar utility */
+.custom-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.custom-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
