@@ -8,14 +8,16 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { 
   getContactMessages, deleteContactMessage, setAdminAuthenticated,
-  getProjects, saveProject, deleteProject, getResumeData, saveResumeData 
+  getProjects, saveProject, deleteProject, getResumeData, saveResumeData,
+  DEFAULT_RESUME_DATA
 } from '../utils/storage';
 import { ContactMessage, Project, ArchitectureNode, ArchitectureLink, ResumeData, CertificationItem, ExperienceItem } from '../types';
 import { 
   Terminal, LogOut, Trash2, Mail, RefreshCw, Database, ArrowLeft,
   Menu, X, Plus, FolderGit2, Calendar, Link, Globe, Code, Layers,
   FileText, Check, CheckCircle2, ChevronRight, HelpCircle, Upload, Image as ImageIcon,
-  Pencil, Save
+  Pencil, Save, Briefcase, Building, Code2, Rocket,
+  Trophy, GraduationCap, Cpu, Server, Users, Sparkles
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -110,7 +112,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'messages' | 'projects' | 'resume'>('messages');
+  const [activeTab, setActiveTab] = useState<'messages' | 'projects' | 'skills' | 'page_content' | 'resume'>('messages');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Project Editing and Delete Confirmation States
@@ -119,8 +121,88 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [messageToDeleteId, setMessageToDeleteId] = useState<string | null>(null);
 
   // Resume Editing States
-  const [resumeForm, setResumeForm] = useState<ResumeData>(getResumeData());
+  const [resumeForm, setResumeForm] = useState<ResumeData>(DEFAULT_RESUME_DATA);
   const [resumeFormSuccess, setResumeFormSuccess] = useState('');
+
+  // Skills Editing States
+  const [newSkillName, setNewSkillName] = useState('');
+  const [newSkillIcon, setNewSkillIcon] = useState('Javascript');
+  const [newSkillCategory, setNewSkillCategory] = useState<'frontend' | 'backend' | 'database' | 'devops'>('frontend');
+  const [newSkillIsCore, setNewSkillIsCore] = useState(false);
+  const [editingSkillIndex, setEditingSkillIndex] = useState<number | null>(null);
+  const [skillsFormSuccess, setSkillsFormSuccess] = useState('');
+
+  const handleAddSkill = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSkillName.trim()) return;
+
+    const newSkill = {
+      name: newSkillName.trim(),
+      icon: newSkillIcon,
+      category: newSkillCategory,
+      isCore: newSkillIsCore
+    };
+
+    const currentSkills = resumeForm.skills || [];
+    let updatedSkills;
+
+    if (editingSkillIndex !== null) {
+      updatedSkills = [...currentSkills];
+      updatedSkills[editingSkillIndex] = newSkill;
+      setEditingSkillIndex(null);
+    } else {
+      updatedSkills = [...currentSkills, newSkill];
+    }
+
+    setResumeForm({
+      ...resumeForm,
+      skills: updatedSkills
+    });
+
+    setNewSkillName('');
+    setNewSkillIcon('Javascript');
+    setNewSkillCategory('frontend');
+    setNewSkillIsCore(false);
+  };
+
+  const handleDeleteSkill = (index: number) => {
+    const currentSkills = resumeForm.skills || [];
+    const updatedSkills = currentSkills.filter((_, i) => i !== index);
+    setResumeForm({
+      ...resumeForm,
+      skills: updatedSkills
+    });
+    if (editingSkillIndex === index) {
+      setEditingSkillIndex(null);
+      setNewSkillName('');
+      setNewSkillIcon('Javascript');
+      setNewSkillCategory('frontend');
+      setNewSkillIsCore(false);
+    }
+  };
+
+  const handleEditSkillClick = (index: number) => {
+    const currentSkills = resumeForm.skills || [];
+    const skill = currentSkills[index];
+    if (!skill) return;
+
+    setEditingSkillIndex(index);
+    setNewSkillName(skill.name);
+    setNewSkillIcon(skill.icon);
+    setNewSkillCategory(skill.category);
+    setNewSkillIsCore(skill.isCore);
+  };
+
+  const handleSaveSkills = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await saveResumeData(resumeForm);
+      setSkillsFormSuccess('Skill Ecosystem dynamic configurations compiled live!');
+      setTimeout(() => setSkillsFormSuccess(''), 4000);
+    } catch (err) {
+      alert('Failed to save skills: ' + err);
+    }
+  };
   
   // New sub-items inputs for resume
   const [newCertName, setNewCertName] = useState('');
@@ -129,6 +211,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [newExpCompany, setNewExpCompany] = useState('');
   const [newExpPeriod, setNewExpPeriod] = useState('');
   const [newExpBulletPoints, setNewExpBulletPoints] = useState('');
+
+  // New sub-items inputs for education list
+  const [newEduDegree, setNewEduDegree] = useState('');
+  const [newEduSchool, setNewEduSchool] = useState('');
+  const [newEduDetails, setNewEduDetails] = useState('');
 
   // Form states for adding/editing a project
   const [projectTitle, setProjectTitle] = useState('');
@@ -253,11 +340,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const loadData = () => {
     setIsRefreshing(true);
-    setTimeout(() => {
-      setMessages(getContactMessages());
-      setProjects(getProjects());
-      setIsRefreshing(false);
-    }, 300);
+    Promise.all([getContactMessages(), getProjects(), getResumeData()])
+      .then(([msgs, projs, resume]) => {
+        setMessages(msgs);
+        setProjects(projs);
+        setResumeForm(resume);
+        setIsRefreshing(false);
+      })
+      .catch((err) => {
+        console.error('Error loading admin dashboard data:', err);
+        setIsRefreshing(false);
+      });
   };
 
   useEffect(() => {
@@ -265,34 +358,48 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
     // Listen to contact messages updates
     const handleMessagesUpdate = () => {
-      setMessages(getContactMessages());
+      getContactMessages().then(setMessages).catch((err) => console.error(err));
     };
     // Listen to projects updates
     const handleProjectsUpdate = () => {
-      setProjects(getProjects());
+      getProjects().then(setProjects).catch((err) => console.error(err));
+    };
+    // Listen to resume updates
+    const handleResumeUpdate = () => {
+      getResumeData().then(setResumeForm).catch((err) => console.error(err));
     };
 
     window.addEventListener('devshell_messages_updated', handleMessagesUpdate);
     window.addEventListener('devshell_projects_updated', handleProjectsUpdate);
+    window.addEventListener('devshell_resume_updated', handleResumeUpdate);
 
     return () => {
       window.removeEventListener('devshell_messages_updated', handleMessagesUpdate);
       window.removeEventListener('devshell_projects_updated', handleProjectsUpdate);
+      window.removeEventListener('devshell_resume_updated', handleResumeUpdate);
     };
   }, []);
 
-  const handleDeleteMessage = (id: string) => {
+  const handleDeleteMessage = async (id: string) => {
     if (confirm('Are you sure you want to delete this message?')) {
-      deleteContactMessage(id);
-      if (selectedMessage?.id === id) {
-        setSelectedMessage(null);
+      try {
+        await deleteContactMessage(id);
+        if (selectedMessage?.id === id) {
+          setSelectedMessage(null);
+        }
+      } catch (err) {
+        alert('Failed to delete message: ' + err);
       }
     }
   };
 
-  const handleDeleteProject = (id: string) => {
+  const handleDeleteProject = async (id: string) => {
     if (confirm('Are you sure you want to delete this project? This will remove it from your main portfolio display.')) {
-      deleteProject(id);
+      try {
+        await deleteProject(id);
+      } catch (err) {
+        alert('Failed to delete project: ' + err);
+      }
     }
   };
 
@@ -301,7 +408,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     onLogout();
   };
 
-  const handleAddProjectSubmit = (e: FormEvent) => {
+  const handleAddProjectSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!projectTitle.trim() || !projectDescription.trim() || !projectChallenges.trim() || !projectSolutions.trim()) {
@@ -331,23 +438,27 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       businessImpact: projectBusinessImpact
     };
 
-    saveProject(newProject);
-    setFormSuccess(editingProjectId ? 'Project updated successfully!' : 'Project registered and deployed successfully!');
-    setEditingProjectId(null);
+    try {
+      await saveProject(newProject);
+      setFormSuccess(editingProjectId ? 'Project updated successfully!' : 'Project registered and deployed successfully!');
+      setEditingProjectId(null);
 
-    // Reset simple form fields (but keep placeholders/year)
-    setProjectTitle('');
-    setProjectDescription('');
-    setProjectChallenges('');
-    setProjectSolutions('');
-    setProjectBusinessImpact('');
-    setProjectTags('');
-    setProjectCodeSnippet('');
-    setProjectImage(PRESET_IMAGES[0].url);
-    
-    setTimeout(() => {
-      setFormSuccess('');
-    }, 4000);
+      // Reset simple form fields (but keep placeholders/year)
+      setProjectTitle('');
+      setProjectDescription('');
+      setProjectChallenges('');
+      setProjectSolutions('');
+      setProjectBusinessImpact('');
+      setProjectTags('');
+      setProjectCodeSnippet('');
+      setProjectImage(PRESET_IMAGES[0].url);
+      
+      setTimeout(() => {
+        setFormSuccess('');
+      }, 4000);
+    } catch (err) {
+      alert('Failed to save project: ' + err);
+    }
   };
 
   const handleEditProjectClick = (proj: Project) => {
@@ -442,11 +553,64 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setResumeForm(updated);
   };
 
-  const handleSaveResume = (e: FormEvent) => {
+  const handleAddEdu = (e: React.FormEvent) => {
     e.preventDefault();
-    saveResumeData(resumeForm);
-    setResumeFormSuccess('Resume data compiled and persistent across sessions!');
-    setTimeout(() => setResumeFormSuccess(''), 4000);
+    if (!newEduDegree.trim() || !newEduSchool.trim()) return;
+    const newEdu = {
+      id: `edu-${Date.now()}`,
+      degree: newEduDegree.trim(),
+      school: newEduSchool.trim(),
+      details: newEduDetails.trim()
+    };
+    const updated = {
+      ...resumeForm,
+      education: [...(resumeForm.education || []), newEdu]
+    };
+    setResumeForm(updated);
+    setNewEduDegree('');
+    setNewEduSchool('');
+    setNewEduDetails('');
+  };
+
+  const handleDeleteEdu = (id: string) => {
+    const updated = {
+      ...resumeForm,
+      education: (resumeForm.education || []).filter(e => e.id !== id)
+    };
+    setResumeForm(updated);
+  };
+
+  const handleAddTelemetryNode = () => {
+    const newStat = {
+      id: `stat-${Date.now()}`,
+      label: 'Nuevo Contador',
+      target: 0,
+      suffix: '+',
+      description: 'Descripción de la métrica.',
+      iconName: 'Code2' as const
+    };
+    setResumeForm({
+      ...resumeForm,
+      telemetryStats: [...(resumeForm.telemetryStats || DEFAULT_RESUME_DATA.telemetryStats || []), newStat]
+    });
+  };
+
+  const handleDeleteTelemetryNode = (id: string) => {
+    setResumeForm({
+      ...resumeForm,
+      telemetryStats: (resumeForm.telemetryStats || DEFAULT_RESUME_DATA.telemetryStats || []).filter(s => s.id !== id)
+    });
+  };
+
+  const handleSaveResume = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      await saveResumeData(resumeForm);
+      setResumeFormSuccess('Resume data compiled and persistent across sessions!');
+      setTimeout(() => setResumeFormSuccess(''), 4000);
+    } catch (err) {
+      alert('Failed to save resume: ' + err);
+    }
   };
 
   // Autocomplete mock fields for fun testing
@@ -472,6 +636,8 @@ func main() {
   const sidebarItems = [
     { id: 'messages', label: 'Ingress Queue', icon: Database, badge: messages.length },
     { id: 'projects', label: 'Projects Directory', icon: FolderGit2 },
+    { id: 'skills', label: 'Skill Ecosystem', icon: Layers },
+    { id: 'page_content', label: 'Page Content', icon: Globe },
     { id: 'resume', label: 'Resume Editor', icon: FileText }
   ] as const;
 
@@ -1358,10 +1524,10 @@ func main() {
                   <div>
                     <h2 className="font-display text-lg font-bold text-on-surface flex items-center gap-2">
                       <FileText className="w-5 h-5 text-primary" />
-                      Modify Resume (Resume Editor)
+                      Modify Page Content & CV
                     </h2>
                     <p className="text-xs text-on-surface-variant mt-1">
-                      Customize contact headers, executive summaries for all modes, certifications, and timeline experience.
+                      Customize landing page sections, telemetry statistics, executive summaries, and professional timeline.
                     </p>
                   </div>
                 </div>
@@ -1695,49 +1861,89 @@ func main() {
                     </div>
                   </div>
 
-                  {/* Education details */}
+                  {/* Education credentials */}
                   <div className="bg-background/30 p-4 rounded-xl border border-outline-variant/10 space-y-4">
                     <h3 className="font-display text-xs uppercase tracking-wider font-bold text-secondary">
                       Education Credentials
                     </h3>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                          Degree Title
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={resumeForm.educationDegree}
-                          onChange={(e) => setResumeForm({ ...resumeForm, educationDegree: e.target.value })}
-                          className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                          University / Institution
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={resumeForm.educationSchool}
-                          onChange={(e) => setResumeForm({ ...resumeForm, educationSchool: e.target.value })}
-                          className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface"
-                        />
-                      </div>
+                    {/* List of existing education items */}
+                    <div className="space-y-3">
+                      {(() => {
+                        const displayEducation = Array.isArray(resumeForm.education) && resumeForm.education.length > 0
+                          ? resumeForm.education
+                          : [
+                              {
+                                id: 'edu-default',
+                                degree: resumeForm.educationDegree || 'B.S. Computer Science & Engineering',
+                                school: resumeForm.educationSchool || 'University of California, Berkeley',
+                                details: resumeForm.educationDetails || 'Graduated with Honors • GPA: 3.82/4.00'
+                              }
+                            ];
+                        return displayEducation.map((edu) => (
+                          <div key={edu.id} className="p-3 bg-background/20 rounded-lg border border-outline-variant/5 flex justify-between items-start gap-4 animate-scale-up">
+                            <div>
+                              <p className="text-xs font-bold text-on-surface">{edu.degree}</p>
+                              <p className="text-[11px] text-on-surface-variant">{edu.school}</p>
+                              <p className="text-[10px] text-primary font-mono mt-0.5">{edu.details}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteEdu(edu.id)}
+                              className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-colors cursor-pointer shrink-0"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ));
+                      })()}
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                        Details / Honors
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={resumeForm.educationDetails}
-                        onChange={(e) => setResumeForm({ ...resumeForm, educationDetails: e.target.value })}
-                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface"
-                      />
+
+                    {/* Form to add a new education item */}
+                    <div className="pt-3 border-t border-outline-variant/10 space-y-3">
+                      <p className="font-mono text-[9px] text-primary uppercase font-bold">Add Education Entry</p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Degree Title</label>
+                          <input
+                            type="text"
+                            value={newEduDegree}
+                            onChange={(e) => setNewEduDegree(e.target.value)}
+                            placeholder="e.g. B.S. Computer Science"
+                            className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">University / Institution</label>
+                          <input
+                            type="text"
+                            value={newEduSchool}
+                            onChange={(e) => setNewEduSchool(e.target.value)}
+                            placeholder="e.g. UC Berkeley"
+                            className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Details / Honors</label>
+                        <input
+                          type="text"
+                          value={newEduDetails}
+                          onChange={(e) => setNewEduDetails(e.target.value)}
+                          placeholder="e.g. Graduated with Honors • GPA: 3.82/4.00"
+                          className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface"
+                        />
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={handleAddEdu}
+                        disabled={!newEduDegree.trim() || !newEduSchool.trim()}
+                        className="px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-40 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-150 cursor-pointer text-left"
+                      >
+                        + Push Education Entry
+                      </button>
                     </div>
                   </div>
 
@@ -1755,6 +1961,477 @@ func main() {
             </div>
           )}
 
+          {/* TAB 4: PAGE CONTENT EDITOR */}
+          {activeTab === 'page_content' && (
+            <div className="space-y-6 max-w-4xl mx-auto" id="page-content-tab-panel">
+              <div className="bg-surface-container-low rounded-2xl border border-outline-variant/20 p-6 shadow-sm animate-scale-up">
+                <div className="border-b border-outline-variant/20 pb-4 mb-6 flex justify-between items-center">
+                  <div>
+                    <h2 className="font-display text-lg font-bold text-on-surface flex items-center gap-2">
+                      <Globe className="w-5 h-5 text-primary" />
+                      Modify Landing Page Content
+                    </h2>
+                    <p className="text-xs text-on-surface-variant mt-1">
+                      Customize landing page descriptions, section headers, and add/remove telemetry counters.
+                    </p>
+                  </div>
+                </div>
+
+                {resumeFormSuccess && (
+                  <div className="mb-6 p-4 bg-green-500/10 text-green-400 border border-green-500/20 rounded-xl flex items-center gap-2.5 text-xs font-mono animate-scale-up">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{resumeFormSuccess}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSaveResume} className="space-y-6">
+                  {/* Page Sections Copywriting Group */}
+                  <div className="bg-background/30 p-4 rounded-xl border border-outline-variant/10 space-y-4">
+                    <h3 className="font-display text-xs uppercase tracking-wider font-bold text-primary">
+                      Landing Page Section Descriptions
+                    </h3>
+                    
+                    <div>
+                      <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                        Hero Subtitle Description
+                      </label>
+                      <textarea
+                        rows={3}
+                        required
+                        value={resumeForm.heroSubtitle || ''}
+                        onChange={(e) => setResumeForm({ ...resumeForm, heroSubtitle: e.target.value })}
+                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface resize-none leading-relaxed"
+                        placeholder="Enter the subtitle shown in the hero section..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                        Work History (Workstory) Section Description
+                      </label>
+                      <textarea
+                        rows={3}
+                        required
+                        value={resumeForm.workstoryDescription || ''}
+                        onChange={(e) => setResumeForm({ ...resumeForm, workstoryDescription: e.target.value })}
+                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface resize-none leading-relaxed"
+                        placeholder="Enter the description text shown under the Work History title..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                        Contact Section Description
+                      </label>
+                      <textarea
+                        rows={3}
+                        required
+                        value={resumeForm.contactDescription || ''}
+                        onChange={(e) => setResumeForm({ ...resumeForm, contactDescription: e.target.value })}
+                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface resize-none leading-relaxed"
+                        placeholder="Enter the description text shown under the Get In Touch title..."
+                      />
+                    </div>
+                  </div>
+
+                  {/* Telemetry Stats Editing Group */}
+                  <div className="bg-background/30 p-4 rounded-xl border border-outline-variant/10 space-y-4">
+                    <div className="flex justify-between items-center pb-2 border-b border-outline-variant/10">
+                      <h3 className="font-display text-xs uppercase tracking-wider font-bold text-secondary">
+                        Telemetry Nodes (Stats Counters)
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={handleAddTelemetryNode}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 hover:bg-secondary/20 text-secondary rounded-lg text-xs font-mono font-bold uppercase transition-all duration-150 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Add Node
+                      </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(resumeForm.telemetryStats || DEFAULT_RESUME_DATA.telemetryStats || []).map((stat, statIdx) => (
+                        <div key={stat.id} className="bg-background/20 p-4 rounded-xl border border-outline-variant/10 space-y-3 relative group/stat animate-scale-up">
+                          <div className="flex justify-between items-center">
+                            <span className="font-mono text-[9px] text-primary uppercase font-bold">
+                              Node #{statIdx + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTelemetryNode(stat.id)}
+                              className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-colors cursor-pointer"
+                              title="Delete Telemetry Node"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Value (Number)</label>
+                              <input
+                                type="number"
+                                required
+                                value={stat.target}
+                                onChange={(e) => {
+                                  const newStats = [...(resumeForm.telemetryStats || DEFAULT_RESUME_DATA.telemetryStats || [])];
+                                  newStats[statIdx] = { ...stat, target: parseInt(e.target.value) || 0 };
+                                  setResumeForm({ ...resumeForm, telemetryStats: newStats });
+                                }}
+                                className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Suffix</label>
+                              <input
+                                type="text"
+                                required
+                                value={stat.suffix || ''}
+                                onChange={(e) => {
+                                  const newStats = [...(resumeForm.telemetryStats || DEFAULT_RESUME_DATA.telemetryStats || [])];
+                                  newStats[statIdx] = { ...stat, suffix: e.target.value };
+                                  setResumeForm({ ...resumeForm, telemetryStats: newStats });
+                                }}
+                                className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Title / Label</label>
+                              <input
+                                type="text"
+                                required
+                                value={stat.label || ''}
+                                onChange={(e) => {
+                                  const newStats = [...(resumeForm.telemetryStats || DEFAULT_RESUME_DATA.telemetryStats || [])];
+                                  newStats[statIdx] = { ...stat, label: e.target.value };
+                                  setResumeForm({ ...resumeForm, telemetryStats: newStats });
+                                }}
+                                className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Icon Representation</label>
+                              <div className="flex gap-2 items-center">
+                                <div className="p-1.5 bg-background/50 border border-outline-variant/20 rounded-lg text-primary shrink-0">
+                                  {(() => {
+                                    const IconComponent = stat.iconName === 'Briefcase' ? Briefcase :
+                                                         stat.iconName === 'Code2' ? Code2 :
+                                                         stat.iconName === 'Building' ? Building :
+                                                         stat.iconName === 'Rocket' ? Rocket :
+                                                         stat.iconName === 'Trophy' ? Trophy :
+                                                         stat.iconName === 'GraduationCap' ? GraduationCap :
+                                                         stat.iconName === 'Cpu' ? Cpu :
+                                                         stat.iconName === 'Globe' ? Globe :
+                                                         stat.iconName === 'Server' ? Server :
+                                                         stat.iconName === 'Database' ? Database :
+                                                         stat.iconName === 'Users' ? Users :
+                                                         stat.iconName === 'Sparkles' ? Sparkles : HelpCircle;
+                                    return <IconComponent className="w-4 h-4" />;
+                                  })()}
+                                </div>
+                                <select
+                                  value={stat.iconName || 'Code2'}
+                                  onChange={(e) => {
+                                    const newStats = [...(resumeForm.telemetryStats || DEFAULT_RESUME_DATA.telemetryStats || [])];
+                                    newStats[statIdx] = { ...stat, iconName: e.target.value as any };
+                                    setResumeForm({ ...resumeForm, telemetryStats: newStats });
+                                  }}
+                                  className="flex-1 bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface cursor-pointer"
+                                >
+                                  <option value="Briefcase" className="bg-surface-container-high text-on-surface">Briefcase (Portfolio / Work)</option>
+                                  <option value="Code2" className="bg-surface-container-high text-on-surface">Code (Experience / Engineering)</option>
+                                  <option value="Building" className="bg-surface-container-high text-on-surface">Building (Companies / Clients)</option>
+                                  <option value="Rocket" className="bg-surface-container-high text-on-surface">Rocket (Performance / Throughput)</option>
+                                  <option value="Trophy" className="bg-surface-container-high text-on-surface">Trophy (Awards / Achievements)</option>
+                                  <option value="GraduationCap" className="bg-surface-container-high text-on-surface">Graduation Cap (Education / Degrees)</option>
+                                  <option value="Cpu" className="bg-surface-container-high text-on-surface">CPU (System / Core logic)</option>
+                                  <option value="Globe" className="bg-surface-container-high text-on-surface">Globe (Web / Global Systems)</option>
+                                  <option value="Server" className="bg-surface-container-high text-on-surface">Server (Backend / Infrastructure)</option>
+                                  <option value="Database" className="bg-surface-container-high text-on-surface">Database (Data / Caching)</option>
+                                  <option value="Users" className="bg-surface-container-high text-on-surface">Users (Team / Clients)</option>
+                                  <option value="Sparkles" className="bg-surface-container-high text-on-surface">Sparkles (Special Highlights)</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Description</label>
+                            <input
+                              type="text"
+                              required
+                              value={stat.description || ''}
+                              onChange={(e) => {
+                                const newStats = [...(resumeForm.telemetryStats || DEFAULT_RESUME_DATA.telemetryStats || [])];
+                                newStats[statIdx] = { ...stat, description: e.target.value };
+                                setResumeForm({ ...resumeForm, telemetryStats: newStats });
+                              }}
+                              className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-outline-variant/20">
+                    <button
+                      type="submit"
+                      className="w-full bg-primary text-on-primary font-mono text-xs font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 hover:opacity-95 transition-all cursor-pointer shadow-md active:scale-95"
+                    >
+                      <Save className="w-4 h-4" />
+                      Save & Publish Page Content
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: SKILLS MANAGER */}
+          {activeTab === 'skills' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-scale-up" id="skills-tab-panel">
+              {/* Form to Add/Edit Skill */}
+              <div className="lg:col-span-5 bg-surface-container-low rounded-2xl border border-outline-variant/20 p-6 flex flex-col shadow-sm">
+                <div className="border-b border-outline-variant/20 pb-4 mb-6">
+                  <h2 className="font-display text-lg font-bold text-on-surface flex items-center gap-2">
+                    {editingSkillIndex !== null ? (
+                      <>
+                        <Pencil className="w-5 h-5 text-secondary animate-pulse" />
+                        Edit Skill Configuration
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-5 h-5 text-primary" />
+                        Add New Technology
+                      </>
+                    )}
+                  </h2>
+                  <p className="text-xs text-on-surface-variant mt-1">
+                    Define name, category, brand icon representation, and whether this is a core stack skill.
+                  </p>
+                </div>
+
+                <form onSubmit={handleAddSkill} className="space-y-4">
+                  <div>
+                    <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                      Technology Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newSkillName}
+                      onChange={(e) => setNewSkillName(e.target.value)}
+                      placeholder="e.g. Next.js, Go, Kubernetes"
+                      className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                        Brand Icon preset
+                      </label>
+                      <select
+                        value={newSkillIcon}
+                        onChange={(e) => setNewSkillIcon(e.target.value)}
+                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-mono text-on-surface transition-all cursor-pointer"
+                      >
+                        <option value="Javascript">JavaScript</option>
+                        <option value="Typescript">TypeScript</option>
+                        <option value="React">React</option>
+                        <option value="ReactNative">React Native</option>
+                        <option value="Node">Node.js</option>
+                        <option value="Postgres">PostgreSQL</option>
+                        <option value="Docker">Docker</option>
+                        <option value="Aws">AWS</option>
+                        <option value="Next">Next.js</option>
+                        <option value="Go">Go</option>
+                        <option value="Redis">Redis</option>
+                        <option value="Graphql">GraphQL</option>
+                        <option value="Kubernetes">Kubernetes</option>
+                        <option value="Github">GitHub</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                        Ecosystem Category
+                      </label>
+                      <select
+                        value={newSkillCategory}
+                        onChange={(e) => setNewSkillCategory(e.target.value as any)}
+                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-mono text-on-surface transition-all cursor-pointer"
+                      >
+                        <option value="frontend">Frontend</option>
+                        <option value="backend">Backend</option>
+                        <option value="database">Database</option>
+                        <option value="devops">Cloud / DevOps</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 py-2">
+                    <input
+                      type="checkbox"
+                      id="skill-is-core"
+                      checked={newSkillIsCore}
+                      onChange={(e) => setNewSkillIsCore(e.target.checked)}
+                      className="w-4 h-4 accent-primary rounded cursor-pointer"
+                    />
+                    <label htmlFor="skill-is-core" className="text-xs text-on-surface font-sans select-none cursor-pointer">
+                      Flag as <span className="text-primary font-bold">Core Stack</span> technology (highlight badge in marquee)
+                    </label>
+                  </div>
+
+                  <div className="pt-2 flex gap-3">
+                    {editingSkillIndex !== null && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingSkillIndex(null);
+                          setNewSkillName('');
+                          setNewSkillIcon('Javascript');
+                          setNewSkillCategory('frontend');
+                          setNewSkillIsCore(false);
+                        }}
+                        className="flex-1 bg-surface-container hover:bg-surface-container-high text-on-surface font-mono text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer active:scale-95 text-center"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={!newSkillName.trim()}
+                      className={`flex-[2] text-on-primary font-mono text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 hover:opacity-95 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-40 ${editingSkillIndex !== null ? 'bg-secondary text-on-secondary' : 'bg-primary text-on-primary'}`}
+                    >
+                      {editingSkillIndex !== null ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          Update Skill Item
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4" />
+                          Push to Skill List
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Active Stack Directory */}
+              <div className="lg:col-span-7 flex flex-col h-full space-y-4">
+                <div className="bg-surface-container-low px-5 py-3 border border-outline-variant/20 rounded-t-xl flex justify-between items-center bg-gradient-to-r from-surface-container-low to-surface-container shrink-0">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-primary" />
+                    <h2 className="font-display text-xs uppercase tracking-wider font-bold text-on-surface">
+                      Dynamic Skill Ecosystem Registry
+                    </h2>
+                  </div>
+                  <span className="font-mono text-[10px] text-on-surface-variant font-bold">
+                    {(resumeForm.skills || []).length} Technologies
+                  </span>
+                </div>
+
+                <div className="border border-t-0 border-outline-variant/20 rounded-b-xl overflow-y-auto custom-scrollbar p-4 space-y-4 bg-background/50 max-h-[500px]">
+                  {skillsFormSuccess && (
+                    <div className="p-3 bg-green-500/10 text-green-400 border border-green-500/20 rounded-xl flex items-center gap-2 text-xs font-mono animate-scale-up">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>{skillsFormSuccess}</span>
+                    </div>
+                  )}
+
+                  {/* Skills display grids grouped by categories */}
+                  {['frontend', 'backend', 'database', 'devops'].map((cat) => {
+                    const categorySkills = (resumeForm.skills || []).filter(s => s.category === cat);
+                    if (categorySkills.length === 0) return null;
+
+                    return (
+                      <div key={cat} className="space-y-2">
+                        <h3 className="font-mono text-[10px] uppercase text-primary font-bold tracking-wider pl-1">
+                          {cat === 'frontend' && 'Frontend Development'}
+                          {cat === 'backend' && 'Backend Logic & Services'}
+                          {cat === 'database' && 'Databases & Cache stores'}
+                          {cat === 'devops' && 'DevOps, Hosting & Automation'}
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {(resumeForm.skills || []).map((skill, originalIdx) => {
+                            if (skill.category !== cat) return null;
+
+                            return (
+                              <div
+                                key={originalIdx}
+                                className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/10 hover:border-outline-variant/30 flex items-center justify-between gap-4 transition-all"
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <span className="font-mono text-[10px] text-on-surface-variant bg-background/50 px-2 py-0.5 rounded border border-outline-variant/10">
+                                    {skill.icon}
+                                  </span>
+                                  <div className="min-w-0">
+                                    <p className="font-sans text-xs font-bold text-on-surface truncate flex items-center gap-1.5">
+                                      {skill.name}
+                                      {skill.isCore && (
+                                        <span className="text-[8px] font-mono bg-primary/10 text-primary border border-primary/20 px-1 rounded uppercase font-semibold">
+                                          Core
+                                        </span>
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleEditSkillClick(originalIdx)}
+                                    className={`p-1.5 rounded-lg border cursor-pointer transition-all active:scale-95 ${editingSkillIndex === originalIdx ? 'bg-secondary text-on-secondary border-secondary' : 'bg-secondary/10 hover:bg-secondary/20 text-secondary border-secondary/20'}`}
+                                    title="Edit skill details"
+                                  >
+                                    <Pencil className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteSkill(originalIdx)}
+                                    className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/20 cursor-pointer transition-all active:scale-95"
+                                    title="Delete skill"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {(resumeForm.skills || []).length === 0 && (
+                    <div className="text-center p-8 border border-dashed border-outline-variant/20 rounded-xl">
+                      <Layers className="w-8 h-8 text-on-surface-variant mb-2 opacity-55" />
+                      <p className="font-mono text-xs text-on-surface-variant uppercase">Ecosystem Empty</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={handleSaveSkills}
+                    className="w-full bg-primary text-on-primary font-mono text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:opacity-95 transition-all cursor-pointer shadow-md active:scale-95"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save & Compile Skill Ecosystem
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

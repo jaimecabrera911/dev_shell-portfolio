@@ -66,6 +66,22 @@ export interface CertificationItem {
   details: string;
 }
 
+export interface TelemetryStatItem {
+  id: string;
+  label: string;
+  target: number;
+  suffix: string;
+  description: string;
+  iconName: 'Briefcase' | 'Code2' | 'Building' | 'Rocket' | 'Trophy' | 'GraduationCap' | 'Cpu' | 'Globe' | 'Server' | 'Database' | 'Users' | 'Sparkles';
+}
+
+export interface EducationItem {
+  id: string;
+  degree: string;
+  school: string;
+  details: string;
+}
+
 export interface ResumeData {
   name: string;
   title: string;
@@ -77,9 +93,15 @@ export interface ResumeData {
   summaryFullstack: string;
   certifications: CertificationItem[];
   experience: ExperienceItem[];
-  educationDegree: string;
-  educationSchool: string;
-  educationDetails: string;
+  educationDegree?: string;
+  educationSchool?: string;
+  educationDetails?: string;
+  education?: EducationItem[];
   pdfBase64?: string;
   pdfFileName?: string;
+  heroSubtitle?: string;
+  workstoryDescription?: string;
+  contactDescription?: string;
+  telemetryStats?: TelemetryStatItem[];
+  skills?: TechItem[];
 }

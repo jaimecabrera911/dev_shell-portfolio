@@ -13,9 +13,10 @@ interface HeroProps {
   title?: string;
   availability?: string;
   certifications?: CertificationItem[];
+  subtitle?: string;
 }
 
-export default function Hero({ onResumeClick, pdfBase64, pdfFileName, title, availability, certifications }: HeroProps) {
+export default function Hero({ onResumeClick, pdfBase64, pdfFileName, title, availability, certifications, subtitle }: HeroProps) {
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -37,10 +38,10 @@ export default function Hero({ onResumeClick, pdfBase64, pdfFileName, title, ava
       {/* Decorative gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-background pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 w-full relative z-10 py-16 md:py-24">
+      <div className="max-w-7xl mx-auto px-6 w-full relative z-10 pt-16 md:pt-24 pb-0">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Column 1: Hero Text Content */}
-          <div className="lg:col-span-7 flex flex-col justify-center">
+          <div className="lg:col-span-7 flex flex-col justify-center pb-8 lg:pb-0">
             {/* Status badge */}
             <div 
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 mb-8 animate-fade-in self-start"
@@ -95,8 +96,7 @@ export default function Hero({ onResumeClick, pdfBase64, pdfFileName, title, ava
               className="font-sans text-base md:text-lg text-on-surface-variant leading-relaxed max-w-2xl mb-10"
               id="hero-subtitle"
             >
-              Crafting resilient, high-performance web applications and cloud architectures. 
-              Specialized in bridging sophisticated frontend aesthetics with robust distributed backends.
+              {subtitle || 'Crafting resilient, high-performance web applications and cloud architectures. Specialized in bridging sophisticated frontend aesthetics with robust distributed backends.'}
             </p>
 
             {/* Buttons */}
@@ -168,16 +168,16 @@ export default function Hero({ onResumeClick, pdfBase64, pdfFileName, title, ava
           </div>
 
           {/* Column 2: Developer Portrait Image */}
-          <div className="lg:col-span-5 w-full flex justify-center items-center">
-            <div className="relative group">
+          <div className="lg:col-span-5 w-full flex justify-center items-end self-end">
+            <div className="relative group w-full max-w-[440px] lg:max-w-full">
               {/* Decorative back glow */}
-              <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-xl group-hover:bg-primary/30 transition-all duration-300 pointer-events-none" />
+              <div className="absolute inset-0 bg-primary/20 rounded-t-2xl rounded-b-none blur-xl group-hover:bg-primary/30 transition-all duration-300 pointer-events-none" />
               {/* Styled Image Wrapper */}
-              <div className="relative glass-card p-2 rounded-2xl overflow-hidden border border-outline-variant/30 shadow-2xl transition-all duration-500 hover:scale-[1.01] hover:border-primary/40">
+              <div className="relative glass-card p-2 rounded-t-2xl rounded-b-none border-b-0 overflow-hidden border border-outline-variant/30 shadow-2xl transition-all duration-500 hover:scale-[1.01] hover:border-primary/40 flex items-end">
                 <img 
                   src="/developer.png" 
                   alt="Developer Portrait" 
-                  className="w-full max-w-[360px] md:max-w-full h-auto rounded-xl object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-auto rounded-t-xl rounded-b-none object-cover grayscale hover:grayscale-0 transition-all duration-500"
                 />
               </div>
             </div>

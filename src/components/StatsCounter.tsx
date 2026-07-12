@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { Briefcase, Building, Code2, Rocket } from 'lucide-react';
+import { Briefcase, Building, Code2, Rocket, Trophy, GraduationCap, Cpu, Globe, Server, Database, Users, Sparkles } from 'lucide-react';
 
 interface AnimatedNumberProps {
   value: number;
@@ -55,45 +55,81 @@ function AnimatedNumber({ value, suffix = '', duration = 1800 }: AnimatedNumberP
   );
 }
 
-export default function StatsCounter() {
-  const stats = [
-    {
-      id: 'stat-projects',
-      label: 'Proyectos Completados',
-      target: 25,
-      suffix: '+',
-      description: 'Plataformas SaaS, automatizaciones y arquitecturas cloud.',
-      icon: Briefcase,
-      color: 'text-primary',
-    },
-    {
-      id: 'stat-experience',
-      label: 'Años de Experiencia',
-      target: 6,
-      suffix: '+',
-      description: 'Diseñando soluciones escalables y seguras en la nube.',
-      icon: Code2,
-      color: 'text-secondary',
-    },
-    {
-      id: 'stat-clients',
-      label: 'Empresas & Clientes',
-      target: 12,
-      suffix: '+',
-      description: 'Colaboraciones internacionales en startups y corporativos.',
-      icon: Building,
-      color: 'text-tertiary',
-    },
-    {
-      id: 'stat-throughput',
-      label: 'Carga Máxima de Tráfico',
-      target: 15,
-      suffix: 'k+ req/seg',
-      description: 'Infraestructura optimizada para alta concurrencia de eventos.',
-      icon: Rocket,
-      color: 'text-green-400',
-    },
-  ];
+import { TelemetryStatItem } from '../types';
+import { HelpCircle } from 'lucide-react';
+
+interface StatsCounterProps {
+  stats?: TelemetryStatItem[];
+}
+
+const ICON_MAP = {
+  Briefcase: Briefcase,
+  Code2: Code2,
+  Building: Building,
+  Rocket: Rocket,
+  Trophy: Trophy,
+  GraduationCap: GraduationCap,
+  Cpu: Cpu,
+  Globe: Globe,
+  Server: Server,
+  Database: Database,
+  Users: Users,
+  Sparkles: Sparkles
+};
+
+const COLOR_MAP = {
+  Briefcase: 'text-primary',
+  Code2: 'text-secondary',
+  Building: 'text-tertiary',
+  Rocket: 'text-green-400',
+  Trophy: 'text-yellow-400',
+  GraduationCap: 'text-blue-400',
+  Cpu: 'text-purple-400',
+  Globe: 'text-sky-400',
+  Server: 'text-indigo-400',
+  Database: 'text-cyan-400',
+  Users: 'text-pink-400',
+  Sparkles: 'text-amber-400'
+};
+
+const fallbackStats = [
+  {
+    id: 'stat-projects',
+    label: 'Proyectos Completados',
+    target: 25,
+    suffix: '+',
+    description: 'Plataformas SaaS, automatizaciones y arquitecturas cloud.',
+    iconName: 'Briefcase' as const,
+  },
+  {
+    id: 'stat-experience',
+    label: 'Años de Experiencia',
+    target: 6,
+    suffix: '+',
+    description: 'Diseñando soluciones escalables y seguras en la nube.',
+    iconName: 'Code2' as const,
+  },
+  {
+    id: 'stat-clients',
+    label: 'Empresas & Clientes',
+    target: 12,
+    suffix: '+',
+    description: 'Colaboraciones internacionales en startups y corporativos.',
+    iconName: 'Building' as const,
+  },
+  {
+    id: 'stat-throughput',
+    label: 'Carga Máxima de Tráfico',
+    target: 15,
+    suffix: 'k+ req/seg',
+    description: 'Infraestructura optimizada para alta concurrencia de eventos.',
+    iconName: 'Rocket' as const,
+  },
+];
+
+export default function StatsCounter({ stats }: StatsCounterProps) {
+  // Use custom stats from database if available, otherwise fall back to default stats
+  const displayStats = (Array.isArray(stats) && stats.length > 0) ? stats : fallbackStats;
 
   return (
     <section className="py-16 bg-surface-container-lowest border-y border-outline-variant/20 relative overflow-hidden" id="stats-section">
@@ -103,8 +139,9 @@ export default function StatsCounter() {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {stats.map((stat) => {
-            const IconComponent = stat.icon;
+          {displayStats.map((stat) => {
+            const IconComponent = ICON_MAP[stat.iconName as keyof typeof ICON_MAP] || HelpCircle;
+            const colorClass = COLOR_MAP[stat.iconName as keyof typeof COLOR_MAP] || 'text-primary';
             return (
               <div
                 key={stat.id}
@@ -112,7 +149,7 @@ export default function StatsCounter() {
                 className="glass-card p-6 rounded-2xl border border-outline-variant/15 flex flex-col justify-between transition-all duration-300 hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(192,193,255,0.06)] group"
               >
                 <div className="flex justify-between items-start mb-4">
-                  <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/10 text-on-surface-variant group-hover:text-primary transition-colors">
+                  <div className={`p-3 bg-surface-container-low rounded-xl border border-outline-variant/10 ${colorClass} group-hover:text-primary transition-colors`}>
                     <IconComponent className="w-5 h-5" />
                   </div>
                   <span className="font-mono text-[9px] uppercase tracking-wider text-on-surface-variant font-bold opacity-60">

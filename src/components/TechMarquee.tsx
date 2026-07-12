@@ -7,6 +7,7 @@
  
 import { useState } from 'react';
 import { TECH_STACK } from '../data';
+import { TechItem } from '../types';
 import { 
   Layers, Database, Cpu, HardDrive, Code, Shield, 
   Server, Box, Cloud, Globe, Terminal, Network, Github 
@@ -52,10 +53,16 @@ const getTechIconColor = (iconName: string) => {
   }
 };
 
-export default function TechMarquee() {
+export interface TechMarqueeProps {
+  skills?: TechItem[];
+}
+
+export default function TechMarquee({ skills }: TechMarqueeProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'frontend' | 'backend' | 'database' | 'devops'>('all');
 
-  const filteredStack = TECH_STACK.filter(
+  const stackSource = skills && skills.length > 0 ? skills : TECH_STACK;
+
+  const filteredStack = stackSource.filter(
     (item) => activeTab === 'all' || item.category === activeTab
   );
 

@@ -11,14 +11,25 @@ import { Calendar, Building, Briefcase } from 'lucide-react';
 import { ExperienceItem } from '../types';
 
 export default function ExperienceTimeline() {
+  const [description, setDescription] = useState('');
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
 
   useEffect(() => {
     // Only call getResumeData once mounted on the client to avoid SSR/hydration mismatches
-    setExperiences(getResumeData().experience || []);
+    getResumeData()
+      .then((data) => {
+        setExperiences(data.experience || []);
+        setDescription(data.workstoryDescription || '');
+      })
+      .catch((err) => console.error('Error loading experience timeline:', err));
 
     const handleResumeChange = () => {
-      setExperiences(getResumeData().experience || []);
+      getResumeData()
+        .then((data) => {
+          setExperiences(data.experience || []);
+          setDescription(data.workstoryDescription || '');
+        })
+        .catch((err) => console.error('Error loading experience timeline on event:', err));
     };
     window.addEventListener('devshell_resume_updated', handleResumeChange);
     return () => {
@@ -38,7 +49,7 @@ export default function ExperienceTimeline() {
           <span className="font-mono text-xs uppercase tracking-widest text-primary block mb-2">Track Record</span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface mb-3">Work History</h2>
           <p className="font-sans text-on-surface-variant text-sm md:text-base leading-relaxed">
-            Over 6 years of experience designing, developing, and optimizing high-throughput digital products and backend infrastructure for startups and enterprise clients worldwide.
+            {description || 'Over 6 years of experience designing, developing, and optimizing high-throughput digital products and backend infrastructure for startups and enterprise clients worldwide.'}
           </p>
         </div>
       </div>

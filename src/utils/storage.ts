@@ -1,15 +1,5 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { ContactMessage, Project, ResumeData } from '../types';
-import { PROJECTS } from '../data';
-
-const MESSAGES_KEY = 'devshell_contact_messages';
-const AUTH_KEY = 'devshell_admin_authenticated';
-const PROJECTS_KEY = 'devshell_portfolio_projects';
-const RESUME_KEY = 'devshell_resume_data';
+import { TECH_STACK } from '../data';
 
 export const DEFAULT_RESUME_DATA: ResumeData = {
   name: 'DEV_SHELL',
@@ -20,6 +10,7 @@ export const DEFAULT_RESUME_DATA: ResumeData = {
   summaryStandard: 'High-performance developer with 6+ years of expertise spanning distributed caching architectures, robust serverless cloud infrastructures, and pixel-perfect reactive design. Proven track record of optimizing critical APIs down to single-digit millisecond latency.',
   summaryArchitect: 'Cloud Infrastructure Solutions Architect specializing in migrating high-traffic legacy monoliths to resilient AWS serverless microservices. Deep proficiency in infrastructure as code (Terraform), Docker orchestration, distributed cache consistency, and CI/CD stream automation.',
   summaryFullstack: 'Senior Fullstack Systems Engineer focused on designing low-latency API gateways, safe serializable database transaction retries, and high-fidelity React dashboard interfaces. Passionate about maintaining 100% type-safety and robust user experiences.',
+  skills: TECH_STACK,
   certifications: [
     {
       id: 'cert-1',
@@ -58,138 +49,131 @@ export const DEFAULT_RESUME_DATA: ResumeData = {
   ],
   educationDegree: 'B.S. Computer Science & Engineering',
   educationSchool: 'University of California, Berkeley',
-  educationDetails: 'Graduated with Honors • GPA: 3.82/4.00'
+  educationDetails: 'Graduated with Honors • GPA: 3.82/4.00',
+  education: [
+    {
+      id: 'edu-1',
+      degree: 'B.S. Computer Science & Engineering',
+      school: 'University of California, Berkeley',
+      details: 'Graduated with Honors • GPA: 3.82/4.00'
+    }
+  ],
+  heroSubtitle: 'Crafting resilient, high-performance web applications and cloud architectures. Specialized in bridging sophisticated frontend aesthetics with robust distributed backends.',
+  workstoryDescription: 'Over 6 years of experience designing, developing, and optimizing high-throughput digital products and backend infrastructure for startups and enterprise clients worldwide.',
+  contactDescription: 'I am always open to discussing new engineering projects, robust cloud architectures, collaboration opportunities, or being part of your technical vision.',
+  telemetryStats: [
+    {
+      id: 'stat-projects',
+      label: 'Proyectos Completados',
+      target: 25,
+      suffix: '+',
+      description: 'Plataformas SaaS, automatizaciones y arquitecturas cloud.',
+      iconName: 'Briefcase'
+    },
+    {
+      id: 'stat-experience',
+      label: 'Años de Experiencia',
+      target: 6,
+      suffix: '+',
+      description: 'Diseñando soluciones escalables y seguras en la nube.',
+      iconName: 'Code2'
+    },
+    {
+      id: 'stat-clients',
+      label: 'Empresas & Clientes',
+      target: 12,
+      suffix: '+',
+      description: 'Colaboraciones internacionales en startups y corporativos.',
+      iconName: 'Building'
+    },
+    {
+      id: 'stat-throughput',
+      label: 'Carga Máxima de Tráfico',
+      target: 15,
+      suffix: 'k+ req/seg',
+      description: 'Infraestructura optimizada para alta concurrencia de eventos.',
+      iconName: 'Rocket'
+    }
+  ]
 };
 
-// Initial dummy messages for a more populated feel in the admin dashboard if empty
-const INITIAL_MESSAGES: ContactMessage[] = [
-  {
-    id: 'msg-1',
-    name: 'Sarah Jenkins',
-    email: 'sarah.j@technexus.io',
-    subject: 'New Project Inquiry',
-    message: 'We are looking for a solutions architect to migrate our client portal from a monolithic Node service to an AWS serverless API. Your distributed system simulator looks exactly like what we need to model our data pipeline. Are you available for a 30-minute introductory call next Tuesday?',
-    timestamp: '07/09/2026, 11:24 AM',
-    status: 'delivered'
-  },
-  {
-    id: 'msg-2',
-    name: 'David Chen',
-    email: 'dchen@cloudscale.net',
-    subject: 'Collaboration Opportunity',
-    message: 'Awesome work on the row-lock concurrency simulations! We have a high-throughput relational database issue in our e-commerce checkout flow. Would love to collaborate or consult on solving some of our lock-contention issues.',
-    timestamp: '07/08/2026, 04:15 PM',
-    status: 'delivered'
-  }
-];
-
-export function getContactMessages(): ContactMessage[] {
-  if (typeof window === 'undefined') {
-    return INITIAL_MESSAGES;
-  }
-  const stored = localStorage.getItem(MESSAGES_KEY);
-  if (!stored) {
-    localStorage.setItem(MESSAGES_KEY, JSON.stringify(INITIAL_MESSAGES));
-    return INITIAL_MESSAGES;
-  }
-  try {
-    return JSON.parse(stored);
-  } catch (e) {
-    return INITIAL_MESSAGES;
-  }
+// Async API wrapper helpers to replace localStorage
+export async function getResumeData(): Promise<ResumeData> {
+  const res = await fetch('/api/resume');
+  if (!res.ok) throw new Error('Failed to fetch resume data');
+  return res.json();
 }
 
-export function saveContactMessage(message: ContactMessage) {
-  if (typeof window === 'undefined') return;
-  const messages = getContactMessages();
-  const updated = [message, ...messages];
-  localStorage.setItem(MESSAGES_KEY, JSON.stringify(updated));
+export async function saveResumeData(data: ResumeData): Promise<void> {
+  const res = await fetch('/api/resume', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to save resume data');
   
-  // Dispatch a custom event so other components know storage updated
-  window.dispatchEvent(new Event('devshell_messages_updated'));
+  // Dispatch custom event to notify components
+  window.dispatchEvent(new Event('devshell_resume_updated'));
 }
 
-export function deleteContactMessage(id: string) {
-  if (typeof window === 'undefined') return;
-  const messages = getContactMessages();
-  const updated = messages.filter((m) => m.id !== id);
-  localStorage.setItem(MESSAGES_KEY, JSON.stringify(updated));
-  window.dispatchEvent(new Event('devshell_messages_updated'));
+export async function getProjects(): Promise<Project[]> {
+  const res = await fetch('/api/projects');
+  if (!res.ok) throw new Error('Failed to fetch projects');
+  return res.json();
 }
 
-export function getProjects(): Project[] {
-  if (typeof window === 'undefined') {
-    return PROJECTS;
-  }
-  const stored = localStorage.getItem(PROJECTS_KEY);
-  if (!stored) {
-    localStorage.setItem(PROJECTS_KEY, JSON.stringify(PROJECTS));
-    return PROJECTS;
-  }
-  try {
-    return JSON.parse(stored);
-  } catch (e) {
-    return PROJECTS;
-  }
-}
-
-export function saveProject(project: Project) {
-  if (typeof window === 'undefined') return;
-  const projects = getProjects();
-  const index = projects.findIndex((p) => p.id === project.id);
-  let updated: Project[];
-  if (index >= 0) {
-    updated = [...projects];
-    updated[index] = project;
-  } else {
-    updated = [...projects, project];
-  }
-  localStorage.setItem(PROJECTS_KEY, JSON.stringify(updated));
+export async function saveProject(project: Project): Promise<void> {
+  const res = await fetch('/api/projects', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(project),
+  });
+  if (!res.ok) throw new Error('Failed to save project');
+  
   window.dispatchEvent(new Event('devshell_projects_updated'));
 }
 
-export function deleteProject(id: string) {
-  if (typeof window === 'undefined') return;
-  const projects = getProjects();
-  const updated = projects.filter((p) => p.id !== id);
-  localStorage.setItem(PROJECTS_KEY, JSON.stringify(updated));
+export async function deleteProject(id: string): Promise<void> {
+  const res = await fetch(`/api/projects?id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete project');
+  
   window.dispatchEvent(new Event('devshell_projects_updated'));
 }
 
-export function setAdminAuthenticated(authenticated: boolean) {
+export async function getContactMessages(): Promise<ContactMessage[]> {
+  const res = await fetch('/api/messages');
+  if (!res.ok) throw new Error('Failed to fetch messages');
+  return res.json();
+}
+
+export async function saveContactMessage(message: ContactMessage): Promise<void> {
+  const res = await fetch('/api/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(message),
+  });
+  if (!res.ok) throw new Error('Failed to save message');
+  
+  window.dispatchEvent(new Event('devshell_messages_updated'));
+}
+
+export async function deleteContactMessage(id: string): Promise<void> {
+  const res = await fetch(`/api/messages?id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete message');
+  
+  window.dispatchEvent(new Event('devshell_messages_updated'));
+}
+
+export function setAdminAuthenticated(authenticated: boolean): void {
   if (typeof window === 'undefined') return;
-  if (authenticated) {
-    localStorage.setItem(AUTH_KEY, 'true');
-  } else {
-    localStorage.removeItem(AUTH_KEY);
-  }
-  window.dispatchEvent(new Event('devshell_auth_updated'));
+  localStorage.setItem('devshell_admin_authenticated', authenticated ? 'true' : 'false');
 }
 
 export function isAdminAuthenticated(): boolean {
   if (typeof window === 'undefined') return false;
-  return localStorage.getItem(AUTH_KEY) === 'true';
+  return localStorage.getItem('devshell_admin_authenticated') === 'true';
 }
-
-export function getResumeData(): ResumeData {
-  if (typeof window === 'undefined') {
-    return DEFAULT_RESUME_DATA;
-  }
-  const stored = localStorage.getItem(RESUME_KEY);
-  if (!stored) {
-    localStorage.setItem(RESUME_KEY, JSON.stringify(DEFAULT_RESUME_DATA));
-    return DEFAULT_RESUME_DATA;
-  }
-  try {
-    return JSON.parse(stored);
-  } catch (e) {
-    return DEFAULT_RESUME_DATA;
-  }
-}
-
-export function saveResumeData(data: ResumeData) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(RESUME_KEY, JSON.stringify(data));
-  window.dispatchEvent(new Event('devshell_resume_updated'));
-}
-

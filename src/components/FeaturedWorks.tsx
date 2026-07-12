@@ -18,11 +18,15 @@ export default function FeaturedWorks() {
   const [filter, setFilter] = useState<'all' | 'cloud' | 'frontend'>('all');
 
   useEffect(() => {
-    // Sync with client-side localStorage after component mounts
-    setProjects(getProjects());
+    // Sync with client-side db after component mounts
+    getProjects()
+      .then(setProjects)
+      .catch((err) => console.error('Error loading projects:', err));
 
     const handleProjectsUpdate = () => {
-      setProjects(getProjects());
+      getProjects()
+        .then(setProjects)
+        .catch((err) => console.error('Error loading projects on event:', err));
     };
     window.addEventListener('devshell_projects_updated', handleProjectsUpdate);
     return () => {

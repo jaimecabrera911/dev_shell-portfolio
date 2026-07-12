@@ -5,10 +5,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
  
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Mail, MapPin, Github, Linkedin, Twitter, Send, Terminal, CheckCircle } from 'lucide-react';
 import { ContactMessage } from '../types';
-import { saveContactMessage } from '../utils/storage';
+import { saveContactMessage, getResumeData } from '../utils/storage';
 
 export default function ContactForm() {
   const [name, setName] = useState('');
@@ -19,6 +19,34 @@ export default function ContactForm() {
   const [sending, setSending] = useState(false);
   const [sentMessages, setSentMessages] = useState<ContactMessage[]>([]);
   const terminalBottomRef = useRef<HTMLDivElement>(null);
+
+  const [contactEmail, setContactEmail] = useState('hello@devshell.io');
+  const [contactLocation, setContactLocation] = useState('San Francisco, CA');
+  const [contactDesc, setContactDesc] = useState('I am always open to discussing new engineering projects, robust cloud architectures, collaboration opportunities, or being part of your technical vision.');
+
+  useEffect(() => {
+    getResumeData()
+      .then((data) => {
+        if (data.email) setContactEmail(data.email);
+        if (data.base) setContactLocation(data.base);
+        if (data.contactDescription) setContactDesc(data.contactDescription);
+      })
+      .catch((err) => console.error('Error loading contact info:', err));
+
+    const handleResumeChange = () => {
+      getResumeData()
+        .then((data) => {
+          if (data.email) setContactEmail(data.email);
+          if (data.base) setContactLocation(data.base);
+          if (data.contactDescription) setContactDesc(data.contactDescription);
+        })
+        .catch((err) => console.error('Error loading contact info on event:', err));
+    };
+    window.addEventListener('devshell_resume_updated', handleResumeChange);
+    return () => {
+      window.removeEventListener('devshell_resume_updated', handleResumeChange);
+    };
+  }, []);
 
   const addLog = (text: string, delay = 0) => {
     return new Promise<void>((resolve) => {
@@ -62,7 +90,7 @@ export default function ContactForm() {
       status: 'delivered'
     };
 
-    saveContactMessage(newMessage);
+    await saveContactMessage(newMessage);
     setSentMessages((prev) => [newMessage, ...prev]);
     setSending(false);
 
@@ -81,7 +109,7 @@ export default function ContactForm() {
             <span className="font-mono text-xs uppercase tracking-widest text-primary block mb-2">Let's Connect</span>
             <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface mb-4">Get In Touch</h2>
             <p className="font-sans text-on-surface-variant text-sm md:text-base leading-relaxed">
-              I am always open to discussing new engineering projects, robust cloud architectures, collaboration opportunities, or being part of your technical vision.
+              {contactDesc}
             </p>
           </div>
 
@@ -93,8 +121,8 @@ export default function ContactForm() {
               </div>
               <div>
                 <p className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">Email Base</p>
-                <a href="mailto:hello@devshell.io" className="font-sans text-sm md:text-base font-semibold text-on-surface hover:text-primary transition-colors">
-                  hello@devshell.io
+                <a href={`mailto:${contactEmail}`} className="font-sans text-sm md:text-base font-semibold text-on-surface hover:text-primary transition-colors">
+                  {contactEmail}
                 </a>
               </div>
             </div>
@@ -105,7 +133,7 @@ export default function ContactForm() {
               </div>
               <div>
                 <p className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">Geographic Base</p>
-                <p className="font-sans text-sm md:text-base font-semibold text-on-surface">San Francisco, CA</p>
+                <p className="font-sans text-sm md:text-base font-semibold text-on-surface">{contactLocation}</p>
               </div>
             </div>
           </div>

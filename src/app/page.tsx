@@ -18,10 +18,14 @@ export default function Home() {
 
   useEffect(() => {
     // Only call getResumeData once mounted on client
-    setResumeData(getResumeData());
+    getResumeData()
+      .then(setResumeData)
+      .catch((err) => console.error('Error loading resume:', err));
 
     const handleResumeChange = () => {
-      setResumeData(getResumeData());
+      getResumeData()
+        .then(setResumeData)
+        .catch((err) => console.error('Error loading resume on event:', err));
     };
     window.addEventListener('devshell_resume_updated', handleResumeChange);
     return () => {
@@ -46,9 +50,10 @@ export default function Home() {
           title={resumeData.title}
           availability={resumeData.availability}
           certifications={resumeData.certifications}
+          subtitle={resumeData.heroSubtitle}
         />
-        <TechMarquee />
-        <StatsCounter />
+        <TechMarquee skills={resumeData.skills} />
+        <StatsCounter stats={resumeData.telemetryStats} />
         <FeaturedWorks />
         <ExperienceTimeline />
         <ContactForm />

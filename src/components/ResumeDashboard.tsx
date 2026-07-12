@@ -10,7 +10,7 @@ import {
   X, Printer, Download, Briefcase, GraduationCap, Award, 
   Terminal, ShieldCheck, ChevronRight, Zap, Target, HelpCircle, Send 
 } from 'lucide-react';
-import { getResumeData } from '../utils/storage';
+import { getResumeData, DEFAULT_RESUME_DATA } from '../utils/storage';
 import { ResumeData } from '../types';
 
 interface ResumeDashboardProps {
@@ -19,7 +19,7 @@ interface ResumeDashboardProps {
 
 export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
   // Resume Data loaded dynamically from local storage
-  const [resumeData, setResumeData] = useState<ResumeData>(getResumeData());
+  const [resumeData, setResumeData] = useState<ResumeData>(DEFAULT_RESUME_DATA);
 
 
   
@@ -33,8 +33,14 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
   ]);
 
   useEffect(() => {
+    getResumeData()
+      .then(setResumeData)
+      .catch((err) => console.error('Error loading resume:', err));
+
     const handleUpdate = () => {
-      setResumeData(getResumeData());
+      getResumeData()
+        .then(setResumeData)
+        .catch((err) => console.error('Error loading resume on event:', err));
     };
     window.addEventListener('devshell_resume_updated', handleUpdate);
     return () => {
@@ -55,7 +61,10 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
     let answer = '';
 
     if (query.includes('stack') || query.includes('technologies') || query.includes('skills')) {
-      answer = 'My core stack includes: TypeScript, Go, React, Next.js, Node.js, PostgreSQL, Docker, AWS Cloud, and Redis. I specialize in building distributed caching layers, serverless ingest pipelines, and row-level locked transaction storefronts.';
+      const skillsList = resumeData.skills && resumeData.skills.length > 0
+        ? resumeData.skills.map(s => s.name).join(', ')
+        : 'TypeScript, Go, React, Next.js, Node.js, PostgreSQL, Docker, AWS Cloud, and Redis';
+      answer = `My core stack includes: ${skillsList}. I specialize in building distributed caching layers, serverless ingest pipelines, and row-level locked transaction storefronts.`;
     } else if (query.includes('certif') || query.includes('award') || query.includes('aws')) {
       answer = 'I hold two premium certifications: 1) AWS Certified Solutions Architect (Professional) - ID: AWS-SAP-9821; 2) CNCF Certified Kubernetes Administrator (CKA) - ID: CKA-88301.';
     } else if (query.includes('technexus') || query.includes('current job') || query.includes('architect')) {
@@ -214,16 +223,32 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                     Education
                   </h3>
                 </div>
-                <div>
-                  <h4 className="font-sans text-xs font-bold text-on-surface print:text-black leading-tight">
-                    {resumeData.educationDegree}
-                  </h4>
-                  <p className="font-sans text-[11px] text-on-surface-variant print:text-black mt-1">
-                    {resumeData.educationSchool}
-                  </p>
-                  <p className="font-mono text-[9px] text-primary print:text-black mt-0.5">
-                    {resumeData.educationDetails}
-                  </p>
+                <div className="space-y-4">
+                  {(() => {
+                    const displayEducation = Array.isArray(resumeData.education) && resumeData.education.length > 0
+                      ? resumeData.education
+                      : [
+                          {
+                            id: 'edu-default',
+                            degree: resumeData.educationDegree || 'B.S. Computer Science & Engineering',
+                            school: resumeData.educationSchool || 'University of California, Berkeley',
+                            details: resumeData.educationDetails || 'Graduated with Honors • GPA: 3.82/4.00'
+                          }
+                        ];
+                    return displayEducation.map((edu) => (
+                      <div key={edu.id} className="border-l-2 border-outline-variant/30 pl-3">
+                        <h4 className="font-sans text-xs font-bold text-on-surface print:text-black leading-tight">
+                          {edu.degree}
+                        </h4>
+                        <p className="font-sans text-[11px] text-on-surface-variant print:text-black mt-0.5">
+                          {edu.school}
+                        </p>
+                        <p className="font-mono text-[9px] text-primary print:text-black mt-0.5">
+                          {edu.details}
+                        </p>
+                      </div>
+                    ));
+                  })()}
                 </div>
               </div>
             </div>
