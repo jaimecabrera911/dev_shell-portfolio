@@ -1,0 +1,8 @@
+{
+  "name": "Remix: DEV_SHELL Portfolio",
+  "description": "High-performance, technical, and sophisticated portfolio website for a Fullstack Developer \u0026 Solutions Architect.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
