@@ -9,8 +9,10 @@ import { useState, useEffect, useRef } from 'react';
 import { getResumeData } from '../utils/storage';
 import { Calendar, Building, Briefcase, Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ExperienceItem } from '../types';
+import { useLocale } from '../contexts/LocaleContext';
 
 export default function ExperienceTimeline() {
+  const { t } = useLocale();
   const [description, setDescription] = useState('');
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
@@ -174,13 +176,13 @@ export default function ExperienceTimeline() {
     <section className="py-20 bg-surface-container-low overflow-hidden" id="experience">
       <div className="max-w-7xl mx-auto px-6 mb-12">
         <div className="max-w-xl">
-          <span className="font-mono text-xs uppercase tracking-widest text-primary block mb-2">Track Record</span>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface mb-3">Work History</h2>
+          <span className="font-mono text-xs uppercase tracking-widest text-primary block mb-2">{t('experience.eyebrow')}</span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface mb-3">{t('experience.title')}</h2>
           <p className="font-sans text-on-surface-variant text-sm md:text-base leading-relaxed">
-            {description || 'Over 6 years of experience designing, developing, and optimizing high-throughput digital products and backend infrastructure for startups and enterprise clients worldwide.'}
+            {description || t('experience.description.fallback')}
           </p>
           <span className="text-[10px] font-mono text-primary/80 mt-2.5 block uppercase tracking-wider">
-            ⚡ Click/Tap marquee to pause. Drag with mouse or swipe to scroll manually.
+            {t('experience.hint')}
           </span>
         </div>
       </div>

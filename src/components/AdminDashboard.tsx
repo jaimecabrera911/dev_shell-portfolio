@@ -205,6 +205,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   // Resume Editing States
   const [resumeForm, setResumeForm] = useState<ResumeData>(DEFAULT_RESUME_DATA);
   const [resumeFormSuccess, setResumeFormSuccess] = useState('');
+  const [resumeLangTab, setResumeLangTab] = useState<'es' | 'en'>('es');
 
   // Skills Editing States
   const [newSkillName, setNewSkillName] = useState('');
@@ -315,10 +316,15 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   // Form states for adding/editing a project
   const [projectTitle, setProjectTitle] = useState('');
+  const [projectTitleEn, setProjectTitleEn] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
+  const [projectDescriptionEn, setProjectDescriptionEn] = useState('');
   const [projectChallenges, setProjectChallenges] = useState('');
+  const [projectChallengesEn, setProjectChallengesEn] = useState('');
   const [projectSolutions, setProjectSolutions] = useState('');
+  const [projectSolutionsEn, setProjectSolutionsEn] = useState('');
   const [projectBusinessImpact, setProjectBusinessImpact] = useState('');
+  const [projectBusinessImpactEn, setProjectBusinessImpactEn] = useState('');
   const [projectImage, setProjectImage] = useState(PRESET_IMAGES[0].url);
   const [projectTags, setProjectTags] = useState('');
   const [projectYear, setProjectYear] = useState('2026');
@@ -519,9 +525,13 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     const newProject: Project = {
       id: newProjectId,
       title: projectTitle,
+      titleEn: projectTitleEn.trim() || undefined,
       description: projectDescription,
+      descriptionEn: projectDescriptionEn.trim() || undefined,
       challenges: projectChallenges,
+      challengesEn: projectChallengesEn.trim() || undefined,
       solutions: projectSolutions,
+      solutionsEn: projectSolutionsEn.trim() || undefined,
       image: projectImage,
       tags: projectTags ? projectTags.split(',').map(t => t.trim()).filter(Boolean) : ['System Architecture'],
       year: projectYear,
@@ -531,7 +541,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       architectureLinks: originalProject?.architectureLinks || templateData.links,
       codeSnippet: projectCodeSnippet || `// ${projectTitle} initialization snippet\nconsole.log("Initializing systems...");`,
       codeLanguage: projectCodeLanguage,
-      businessImpact: projectBusinessImpact
+      businessImpact: projectBusinessImpact,
+      businessImpactEn: projectBusinessImpactEn.trim() || undefined
     };
 
     try {
@@ -541,10 +552,15 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       // Reset simple form fields (but keep placeholders/year)
       setProjectTitle('');
+      setProjectTitleEn('');
       setProjectDescription('');
+      setProjectDescriptionEn('');
       setProjectChallenges('');
+      setProjectChallengesEn('');
       setProjectSolutions('');
+      setProjectSolutionsEn('');
       setProjectBusinessImpact('');
+      setProjectBusinessImpactEn('');
       setProjectTags('');
       setProjectCodeSnippet('');
       setProjectImage(PRESET_IMAGES[0].url);
@@ -560,10 +576,15 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const handleEditProjectClick = (proj: Project) => {
     setEditingProjectId(proj.id);
     setProjectTitle(proj.title);
+    setProjectTitleEn(proj.titleEn || '');
     setProjectDescription(proj.description || '');
+    setProjectDescriptionEn(proj.descriptionEn || '');
     setProjectChallenges(proj.challenges || '');
+    setProjectChallengesEn(proj.challengesEn || '');
     setProjectSolutions(proj.solutions || '');
+    setProjectSolutionsEn(proj.solutionsEn || '');
     setProjectBusinessImpact(proj.businessImpact || '');
+    setProjectBusinessImpactEn(proj.businessImpactEn || '');
     setProjectImage(proj.image || PRESET_IMAGES[0].url);
     setProjectTags(proj.tags ? proj.tags.join(', ') : '');
     setProjectYear(proj.year || '2026');
@@ -583,9 +604,15 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const handleCancelEdit = () => {
     setEditingProjectId(null);
     setProjectTitle('');
+    setProjectTitleEn('');
     setProjectDescription('');
+    setProjectDescriptionEn('');
     setProjectChallenges('');
+    setProjectChallengesEn('');
     setProjectSolutions('');
+    setProjectSolutionsEn('');
+    setProjectBusinessImpact('');
+    setProjectBusinessImpactEn('');
     setProjectTags('');
     setProjectYear('2026');
     setProjectDemoUrl('#');
@@ -1184,19 +1211,33 @@ func main() {
                 )}
 
                 <form onSubmit={handleAddProjectSubmit} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                        Project Title *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={projectTitle}
-                        onChange={(e) => setProjectTitle(e.target.value)}
-                        placeholder="e.g. Lumina Analytics Engine"
-                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all"
-                      />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                          Project Title (Spanish) *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={projectTitle}
+                          onChange={(e) => setProjectTitle(e.target.value)}
+                          placeholder="e.g. Lumina Analytics Engine"
+                          className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                          Project Title (English)
+                        </label>
+                        <input
+                          type="text"
+                          value={projectTitleEn}
+                          onChange={(e) => setProjectTitleEn(e.target.value)}
+                          placeholder="e.g. Lumina Analytics Engine"
+                          className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all"
+                        />
+                      </div>
                     </div>
                     <div>
                       <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
@@ -1213,18 +1254,32 @@ func main() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                      Short Description *
-                    </label>
-                    <textarea
-                      required
-                      rows={2}
-                      value={projectDescription}
-                      onChange={(e) => setProjectDescription(e.target.value)}
-                      placeholder="Give a brief summary of what the system does (displayed on card grids)."
-                      className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-none"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                        Short Description (Spanish) *
+                      </label>
+                      <textarea
+                        required
+                        rows={2}
+                        value={projectDescription}
+                        onChange={(e) => setProjectDescription(e.target.value)}
+                        placeholder="Give a brief summary of what the system does (displayed on card grids)."
+                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                        Short Description (English)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={projectDescriptionEn}
+                        onChange={(e) => setProjectDescriptionEn(e.target.value)}
+                        placeholder="Give a brief summary of what the system does in English."
+                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-none"
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1258,47 +1313,94 @@ func main() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                        Technical Challenge *
-                      </label>
-                      <textarea
-                        required
-                        rows={3}
-                        value={projectChallenges}
-                        onChange={(e) => setProjectChallenges(e.target.value)}
-                        placeholder="Describe the architectural core problem or lock contention..."
-                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-none"
-                      />
+                  <div className="border-t border-outline-variant/10 pt-4 space-y-4">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">Spanish Content</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                          Technical Challenge (Spanish) *
+                        </label>
+                        <textarea
+                          required
+                          rows={3}
+                          value={projectChallenges}
+                          onChange={(e) => setProjectChallenges(e.target.value)}
+                          placeholder="Describe the architectural core problem or lock contention..."
+                          className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                          Architectural Solution (Spanish) *
+                        </label>
+                        <textarea
+                          required
+                          rows={3}
+                          value={projectSolutions}
+                          onChange={(e) => setProjectSolutions(e.target.value)}
+                          placeholder="Detail how you engineered around or patched this problem..."
+                          className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-none"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                        Architectural Solution *
-                      </label>
-                      <textarea
-                        required
-                        rows={3}
-                        value={projectSolutions}
-                        onChange={(e) => setProjectSolutions(e.target.value)}
-                        placeholder="Detail how you engineered around or patched this problem..."
-                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-none"
-                      />
+                  </div>
+
+                  <div className="border-t border-outline-variant/10 pt-4 space-y-4">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">English Content</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                          Technical Challenge (English)
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={projectChallengesEn}
+                          onChange={(e) => setProjectChallengesEn(e.target.value)}
+                          placeholder="Describe the architectural core problem in English..."
+                          className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                          Architectural Solution (English)
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={projectSolutionsEn}
+                          onChange={(e) => setProjectSolutionsEn(e.target.value)}
+                          placeholder="Detail how you engineered around this problem in English..."
+                          className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-none"
+                        />
+                      </div>
                     </div>
                   </div>
 
                   {/* Business & Operational Impact */}
-                  <div>
-                    <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                      Business & Operational Impact (Optional)
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={projectBusinessImpact}
-                      onChange={(e) => setProjectBusinessImpact(e.target.value)}
-                      placeholder="Detail the metrics, server cost reduction, page load speedups, or conversion hikes resulting from this solution..."
-                      className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-y"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                        Business & Operational Impact (Spanish)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={projectBusinessImpact}
+                        onChange={(e) => setProjectBusinessImpact(e.target.value)}
+                        placeholder="Detail metrics, speedups, or conversion hikes in Spanish..."
+                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-y"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
+                        Business & Operational Impact (English)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={projectBusinessImpactEn}
+                        onChange={(e) => setProjectBusinessImpactEn(e.target.value)}
+                        placeholder="Detail metrics, speedups, or conversion hikes in English..."
+                        className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2.5 text-xs font-sans text-on-surface transition-all resize-y"
+                      />
+                    </div>
                   </div>
 
                   {/* Cover Design Image Selection and File Upload */}
@@ -1628,6 +1730,25 @@ func main() {
                   </div>
                 </div>
 
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={() => setResumeLangTab('es')}
+                    className={`px-3 py-1.5 rounded text-xs font-mono font-bold transition-colors ${
+                      resumeLangTab === 'es' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                    }`}
+                  >
+                    Español
+                  </button>
+                  <button
+                    onClick={() => setResumeLangTab('en')}
+                    className={`px-3 py-1.5 rounded text-xs font-mono font-bold transition-colors ${
+                      resumeLangTab === 'en' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                    }`}
+                  >
+                    English
+                  </button>
+                </div>
+
                 {resumeFormSuccess && (
                   <div className="mb-6 p-4 bg-green-500/10 text-green-400 border border-green-500/20 rounded-xl flex items-center gap-2.5 text-xs font-mono animate-scale-up">
                     <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -1657,13 +1778,13 @@ func main() {
                       </div>
                       <div>
                         <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                          Professional Title
+                          Professional Title {resumeLangTab === 'en' ? '(English)' : '(Español)'}
                         </label>
                         <input
                           type="text"
                           required
-                          value={resumeForm.title}
-                          onChange={(e) => setResumeForm({ ...resumeForm, title: e.target.value })}
+                          value={resumeLangTab === 'es' ? resumeForm.title : resumeForm.titleEn || ''}
+                          onChange={(e) => setResumeForm({ ...resumeForm, ...(resumeLangTab === 'es' ? { title: e.target.value } : { titleEn: e.target.value }) })}
                           className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface"
                         />
                       </div>
@@ -1696,13 +1817,13 @@ func main() {
                       </div>
                       <div>
                         <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                          Availability Status
+                          Availability Status {resumeLangTab === 'en' ? '(English)' : '(Español)'}
                         </label>
                         <input
                           type="text"
                           required
-                          value={resumeForm.availability}
-                          onChange={(e) => setResumeForm({ ...resumeForm, availability: e.target.value })}
+                          value={resumeLangTab === 'es' ? resumeForm.availability : resumeForm.availabilityEn || ''}
+                          onChange={(e) => setResumeForm({ ...resumeForm, ...(resumeLangTab === 'es' ? { availability: e.target.value } : { availabilityEn: e.target.value }) })}
                           className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface"
                         />
                       </div>
@@ -1793,13 +1914,13 @@ func main() {
                     <div className="space-y-4">
                       <div>
                         <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                          Executive Summary Text
+                          Executive Summary Text {resumeLangTab === 'en' ? '(English)' : '(Español)'}
                         </label>
                         <textarea
                           required
                           rows={3}
-                          value={resumeForm.summaryStandard}
-                          onChange={(e) => setResumeForm({ ...resumeForm, summaryStandard: e.target.value })}
+                          value={resumeLangTab === 'es' ? resumeForm.summaryStandard : resumeForm.summaryStandardEn || ''}
+                          onChange={(e) => setResumeForm({ ...resumeForm, ...(resumeLangTab === 'es' ? { summaryStandard: e.target.value } : { summaryStandardEn: e.target.value }) })}
                           className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface resize-none"
                         />
                       </div>
@@ -1817,8 +1938,8 @@ func main() {
                       {(resumeForm.certifications || []).map((cert) => (
                         <div key={cert.id} className="flex justify-between items-center gap-4 bg-background/40 p-2.5 rounded-lg border border-outline-variant/10 text-xs">
                           <div className="min-w-0">
-                            <p className="font-bold text-on-surface truncate">{cert.name}</p>
-                            <p className="font-mono text-[10px] text-on-surface-variant truncate">{cert.details}</p>
+                            <p className="font-bold text-on-surface truncate">{resumeLangTab === 'en' ? (cert.nameEn || cert.name) : cert.name}</p>
+                            <p className="font-mono text-[10px] text-on-surface-variant truncate">{resumeLangTab === 'en' ? (cert.detailsEn || cert.details) : cert.details}</p>
                           </div>
                           <button
                             type="button"
@@ -1879,7 +2000,7 @@ func main() {
                         <div key={exp.id} className="bg-background/40 p-3.5 rounded-lg border border-outline-variant/10 text-xs space-y-2">
                           <div className="flex justify-between items-start gap-4">
                             <div className="min-w-0">
-                              <p className="font-bold text-on-surface text-sm truncate">{exp.role}</p>
+                              <p className="font-bold text-on-surface text-sm truncate">{resumeLangTab === 'en' ? (exp.roleEn || exp.role) : exp.role}</p>
                               <p className="text-primary font-semibold truncate">{exp.company}</p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
@@ -1895,7 +2016,7 @@ func main() {
                             </div>
                           </div>
                           <ul className="pl-4 list-disc space-y-1 text-[11px] text-on-surface-variant leading-relaxed">
-                            {exp.bulletPoints.map((bp, bpIdx) => (
+                            {(resumeLangTab === 'en' && exp.bulletPointsEn && exp.bulletPointsEn.length > 0 ? exp.bulletPointsEn : exp.bulletPoints).map((bp, bpIdx) => (
                               <li key={bpIdx}>{bp}</li>
                             ))}
                           </ul>
@@ -1979,9 +2100,9 @@ func main() {
                         return displayEducation.map((edu) => (
                           <div key={edu.id} className="p-3 bg-background/20 rounded-lg border border-outline-variant/5 flex justify-between items-start gap-4 animate-scale-up">
                             <div>
-                              <p className="text-xs font-bold text-on-surface">{edu.degree}</p>
-                              <p className="text-[11px] text-on-surface-variant">{edu.school}</p>
-                              <p className="text-[10px] text-primary font-mono mt-0.5">{edu.details}</p>
+                              <p className="text-xs font-bold text-on-surface">{resumeLangTab === 'en' ? (edu.degreeEn || edu.degree) : edu.degree}</p>
+                              <p className="text-[11px] text-on-surface-variant">{resumeLangTab === 'en' ? (edu.schoolEn || edu.school) : edu.school}</p>
+                              <p className="text-[10px] text-primary font-mono mt-0.5">{resumeLangTab === 'en' ? (edu.detailsEn || edu.details) : edu.details}</p>
                             </div>
                             <button
                               type="button"
@@ -2073,6 +2194,25 @@ func main() {
                   </div>
                 </div>
 
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={() => setResumeLangTab('es')}
+                    className={`px-3 py-1.5 rounded text-xs font-mono font-bold transition-colors ${
+                      resumeLangTab === 'es' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                    }`}
+                  >
+                    Español
+                  </button>
+                  <button
+                    onClick={() => setResumeLangTab('en')}
+                    className={`px-3 py-1.5 rounded text-xs font-mono font-bold transition-colors ${
+                      resumeLangTab === 'en' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                    }`}
+                  >
+                    English
+                  </button>
+                </div>
+
                 {resumeFormSuccess && (
                   <div className="mb-6 p-4 bg-green-500/10 text-green-400 border border-green-500/20 rounded-xl flex items-center gap-2.5 text-xs font-mono animate-scale-up">
                     <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -2089,13 +2229,13 @@ func main() {
                     
                     <div>
                       <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                        Hero Subtitle Description
+                        Hero Subtitle Description {resumeLangTab === 'en' ? '(English)' : '(Español)'}
                       </label>
                       <textarea
                         rows={3}
                         required
-                        value={resumeForm.heroSubtitle || ''}
-                        onChange={(e) => setResumeForm({ ...resumeForm, heroSubtitle: e.target.value })}
+                        value={resumeLangTab === 'es' ? (resumeForm.heroSubtitle || '') : (resumeForm.heroSubtitleEn || '')}
+                        onChange={(e) => setResumeForm({ ...resumeForm, ...(resumeLangTab === 'es' ? { heroSubtitle: e.target.value } : { heroSubtitleEn: e.target.value }) })}
                         className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface resize-none leading-relaxed"
                         placeholder="Enter the subtitle shown in the hero section..."
                       />
@@ -2103,13 +2243,13 @@ func main() {
 
                     <div>
                       <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                        Work History (Workstory) Section Description
+                        Work History (Workstory) Section Description {resumeLangTab === 'en' ? '(English)' : '(Español)'}
                       </label>
                       <textarea
                         rows={3}
                         required
-                        value={resumeForm.workstoryDescription || ''}
-                        onChange={(e) => setResumeForm({ ...resumeForm, workstoryDescription: e.target.value })}
+                        value={resumeLangTab === 'es' ? (resumeForm.workstoryDescription || '') : (resumeForm.workstoryDescriptionEn || '')}
+                        onChange={(e) => setResumeForm({ ...resumeForm, ...(resumeLangTab === 'es' ? { workstoryDescription: e.target.value } : { workstoryDescriptionEn: e.target.value }) })}
                         className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface resize-none leading-relaxed"
                         placeholder="Enter the description text shown under the Work History title..."
                       />
@@ -2117,13 +2257,13 @@ func main() {
 
                     <div>
                       <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold mb-1.5">
-                        Contact Section Description
+                        Contact Section Description {resumeLangTab === 'en' ? '(English)' : '(Español)'}
                       </label>
                       <textarea
                         rows={3}
                         required
-                        value={resumeForm.contactDescription || ''}
-                        onChange={(e) => setResumeForm({ ...resumeForm, contactDescription: e.target.value })}
+                        value={resumeLangTab === 'es' ? (resumeForm.contactDescription || '') : (resumeForm.contactDescriptionEn || '')}
+                        onChange={(e) => setResumeForm({ ...resumeForm, ...(resumeLangTab === 'es' ? { contactDescription: e.target.value } : { contactDescriptionEn: e.target.value }) })}
                         className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-xl px-3.5 py-2 text-xs font-sans text-on-surface resize-none leading-relaxed"
                         placeholder="Enter the description text shown under the Get In Touch title..."
                       />
@@ -2196,22 +2336,22 @@ func main() {
 
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Title / Label</label>
+                              <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Title / Label {resumeLangTab === 'en' ? '(EN)' : '(ES)'}</label>
                               <input
                                 type="text"
                                 required
-                                value={stat.label || ''}
+                                value={resumeLangTab === 'es' ? (stat.label || '') : (stat.labelEn || '')}
                                 onChange={(e) => {
                                   const newStats = [...(resumeForm.telemetryStats || DEFAULT_RESUME_DATA.telemetryStats || [])];
-                                  newStats[statIdx] = { ...stat, label: e.target.value };
+                                  newStats[statIdx] = { ...stat, ...(resumeLangTab === 'es' ? { label: e.target.value } : { labelEn: e.target.value }) };
                                   setResumeForm({ ...resumeForm, telemetryStats: newStats });
                                 }}
                                 className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface"
                               />
                             </div>
-                            <div>
+                            <div className="min-w-0">
                               <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Icon Representation</label>
-                              <div className="flex gap-2 items-center">
+                              <div className="flex gap-2 items-center min-w-0">
                                 <div className="p-1.5 bg-background/50 border border-outline-variant/20 rounded-lg text-primary shrink-0">
                                   {(() => {
                                     const IconComponent = stat.iconName === 'Briefcase' ? Briefcase :
@@ -2236,7 +2376,7 @@ func main() {
                                     newStats[statIdx] = { ...stat, iconName: e.target.value as any };
                                     setResumeForm({ ...resumeForm, telemetryStats: newStats });
                                   }}
-                                  className="flex-1 bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface cursor-pointer"
+                                  className="flex-1 min-w-0 w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface cursor-pointer"
                                 >
                                   <option value="Briefcase" className="bg-surface-container-high text-on-surface">Briefcase (Portfolio / Work)</option>
                                   <option value="Code2" className="bg-surface-container-high text-on-surface">Code (Experience / Engineering)</option>
@@ -2256,14 +2396,14 @@ func main() {
                           </div>
 
                           <div>
-                            <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Description</label>
+                            <label className="block text-[8px] font-mono uppercase text-on-surface-variant mb-1">Description {resumeLangTab === 'en' ? '(EN)' : '(ES)'}</label>
                             <input
                               type="text"
                               required
-                              value={stat.description || ''}
+                              value={resumeLangTab === 'es' ? (stat.description || '') : (stat.descriptionEn || '')}
                               onChange={(e) => {
                                 const newStats = [...(resumeForm.telemetryStats || DEFAULT_RESUME_DATA.telemetryStats || [])];
-                                newStats[statIdx] = { ...stat, description: e.target.value };
+                                newStats[statIdx] = { ...stat, ...(resumeLangTab === 'es' ? { description: e.target.value } : { descriptionEn: e.target.value }) };
                                 setResumeForm({ ...resumeForm, telemetryStats: newStats });
                               }}
                               className="w-full bg-background/50 border border-outline-variant/20 focus:border-primary/50 outline-none rounded-lg px-2.5 py-1.5 text-xs text-on-surface"

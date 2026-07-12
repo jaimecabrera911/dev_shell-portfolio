@@ -7,6 +7,7 @@
 
 import { Project } from '../types';
 import { X, ExternalLink, Github } from 'lucide-react';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface ProjectDetailModalProps {
   project: Project;
@@ -15,6 +16,14 @@ interface ProjectDetailModalProps {
 }
 
 export default function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps) {
+  const { locale } = useLocale();
+  
+  const displayTitle = locale === 'en' && project.titleEn ? project.titleEn : project.title;
+  const displayDescription = locale === 'en' && project.descriptionEn ? project.descriptionEn : project.description;
+  const displayChallenges = locale === 'en' && project.challengesEn ? project.challengesEn : project.challenges;
+  const displaySolutions = locale === 'en' && project.solutionsEn ? project.solutionsEn : project.solutions;
+  const displayImpact = locale === 'en' && project.businessImpactEn ? project.businessImpactEn : project.businessImpact;
+
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md overflow-y-auto cursor-pointer" 
@@ -64,7 +73,7 @@ export default function ProjectDetailModal({ project, onClose }: ProjectDetailMo
                 ))}
               </div>
               <h2 className="font-display text-2xl md:text-3xl font-bold text-on-surface leading-tight">
-                {project.title}
+                {displayTitle}
               </h2>
             </div>
           </div>
@@ -75,7 +84,7 @@ export default function ProjectDetailModal({ project, onClose }: ProjectDetailMo
               <div>
                 <h3 className="font-mono text-xs uppercase tracking-wider text-primary mb-2">Overview</h3>
                 <p className="font-sans text-on-surface-variant leading-relaxed text-sm md:text-base">
-                  {project.description}
+                  {displayDescription}
                 </p>
               </div>
 
@@ -83,22 +92,22 @@ export default function ProjectDetailModal({ project, onClose }: ProjectDetailMo
                 <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/20">
                   <h4 className="font-mono text-xs uppercase tracking-wider text-red-400 mb-2 font-semibold">The Technical Challenge</h4>
                   <p className="font-sans text-xs text-on-surface-variant leading-relaxed">
-                    {project.challenges}
+                    {displayChallenges}
                   </p>
                 </div>
                 <div className="bg-surface-container-low p-4 rounded-xl border border-primary/20">
                   <h4 className="font-mono text-xs uppercase tracking-wider text-green-400 mb-2 font-semibold">Architectural Solution</h4>
                   <p className="font-sans text-xs text-on-surface-variant leading-relaxed">
-                    {project.solutions}
+                    {displaySolutions}
                   </p>
                 </div>
               </div>
 
-              {project.businessImpact && (
+              {displayImpact && (
                 <div className="bg-surface-container-low p-4 rounded-xl border border-secondary/20">
                   <h4 className="font-mono text-xs uppercase tracking-wider text-secondary mb-2 font-semibold">Business & Operational Impact</h4>
                   <p className="font-sans text-xs text-on-surface-variant leading-relaxed">
-                    {project.businessImpact}
+                    {displayImpact}
                   </p>
                 </div>
               )}

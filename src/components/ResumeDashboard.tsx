@@ -12,12 +12,15 @@ import {
 } from 'lucide-react';
 import { getResumeData, DEFAULT_RESUME_DATA } from '../utils/storage';
 import { ResumeData } from '../types';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface ResumeDashboardProps {
   onClose: () => void;
 }
 
 export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
+  const { locale, t } = useLocale();
+
   // Resume Data loaded dynamically from local storage
   const [resumeData, setResumeData] = useState<ResumeData>(DEFAULT_RESUME_DATA);
 
@@ -28,7 +31,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
   const [terminalHistory, setTerminalHistory] = useState<Array<{ q: string; a: string }>>([
     {
       q: 'help',
-      a: 'Welcome to the DEV_SHELL CV Query Interface. Try asking: "What is your stack?", "Are you certified?", "Tell me about TechNexus", or "Are you open to relocate?"'
+      a: t('resume.terminal.welcome')
     }
   ]);
 
@@ -63,24 +66,24 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
     if (query.includes('stack') || query.includes('technologies') || query.includes('skills')) {
       const skillsList = resumeData.skills && resumeData.skills.length > 0
         ? resumeData.skills.map(s => s.name).join(', ')
-        : 'TypeScript, Go, React, Next.js, Node.js, PostgreSQL, Docker, AWS Cloud, and Redis';
-      answer = `My core stack includes: ${skillsList}. I specialize in building distributed caching layers, serverless ingest pipelines, and row-level locked transaction storefronts.`;
+        : t('resume.terminal.skills.fallback');
+      answer = t('resume.terminal.skills').replace('{skillsList}', skillsList);
     } else if (query.includes('certif') || query.includes('award') || query.includes('aws')) {
-      answer = 'I hold two premium certifications: 1) AWS Certified Solutions Architect (Professional) - ID: AWS-SAP-9821; 2) CNCF Certified Kubernetes Administrator (CKA) - ID: CKA-88301.';
+      answer = t('resume.terminal.certs');
     } else if (query.includes('technexus') || query.includes('current job') || query.includes('architect')) {
-      answer = 'At TechNexus Systems (2022-Present), I serve as Senior Solutions Architect. I migrated a legacy monolith to AWS microservices, optimized CI/CD pipelines reducing deployment times by 45%, and mentored a team of 12 full-stack engineers.';
+      answer = t('resume.terminal.technexus');
     } else if (query.includes('reloc') || query.includes('remote') || query.includes('location')) {
-      answer = 'I am currently based in San Francisco, CA. I am open to hybrid roles in the Bay Area, as well as full-remote positions globally.';
+      answer = t('resume.terminal.location');
     } else if (query.includes('education') || query.includes('university') || query.includes('college')) {
-      answer = 'I completed my Bachelor of Science in Computer Science & Engineering from University of California, Berkeley (2013-2017), graduating with Honors (GPA 3.82/4.00) and specializing in Distributed Systems.';
+      answer = t('resume.terminal.education');
     } else if (query.includes('clear') || query === 'cls') {
       setTerminalHistory([]);
       setTerminalInput('');
       return;
     } else if (query.includes('help')) {
-      answer = 'Supported queries: "stack", "certifications", "technexus", "location", "education", "clear".';
+      answer = t('resume.terminal.help');
     } else {
-      answer = `No direct match found for "${terminalInput}". Try asking about my "stack", "certifications", "education", or current role at "TechNexus".`;
+      answer = t('resume.terminal.noMatch').replace('{input}', terminalInput);
     }
 
     setTerminalHistory((prev) => [...prev, { q: terminalInput, a: answer }]);
@@ -96,7 +99,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
         {/* Navigation Bar / Header Bar */}
         <div className="bg-surface-container-low px-6 py-4 flex justify-between items-center border-b border-outline-variant/30 print:hidden">
           <div className="flex items-center gap-3">
-            <span className="w-3.5 h-3.5 rounded-full bg-red-500/80 cursor-pointer hover:scale-105 transition-transform" onClick={onClose} title="Close" />
+            <span className="w-3.5 h-3.5 rounded-full bg-red-500/80 cursor-pointer hover:scale-105 transition-transform" onClick={onClose} title={t('resume.close')} />
             <span className="w-3.5 h-3.5 rounded-full bg-yellow-500/80" />
             <span className="w-3.5 h-3.5 rounded-full bg-green-500/80" />
             <span className="font-mono text-xs text-primary ml-2 font-semibold">
@@ -113,10 +116,10 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                 href={resumeData.pdfBase64}
                 download={resumeData.pdfFileName || 'resume.pdf'}
                 className="inline-flex items-center gap-1.5 bg-primary text-on-primary hover:bg-opacity-95 px-3 py-1.5 rounded-lg font-mono text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
-                title="Download Attached PDF Resume"
+                title={t('resume.download.title')}
               >
                 <Download className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Download PDF</span>
+                <span className="hidden sm:inline">{t('resume.download')}</span>
               </a>
             )}
 
@@ -124,10 +127,10 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
             <button
               onClick={handlePrint}
               className="inline-flex items-center gap-1.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary px-3 py-1.5 rounded-lg font-mono text-xs transition-all cursor-pointer shadow-sm"
-              title="Print CV / Export PDF"
+              title={t('resume.print.title')}
             >
               <Printer className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Print CV / PDF</span>
+              <span className="hidden sm:inline">{t('resume.print')}</span>
             </button>
 
             {/* Close Button */}
@@ -154,20 +157,20 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                   {resumeData.name}
                 </h2>
                 <p className="font-mono text-xs text-primary font-semibold uppercase tracking-wider mb-4">
-                  {resumeData.title || "Fullstack Developer & Solutions Architect"}
+                  {resumeData.title || t('resume.title.fallback')}
                 </p>
 
                 <div className="space-y-2.5 font-sans text-xs text-on-surface-variant print:text-black">
                   <div className="flex justify-between border-b border-outline-variant/10 pb-2">
-                    <span className="font-semibold">Email</span>
+                    <span className="font-semibold">{t('resume.email')}</span>
                     <span>{resumeData.email}</span>
                   </div>
                   <div className="flex justify-between border-b border-outline-variant/10 pb-2">
-                    <span className="font-semibold">Base</span>
+                    <span className="font-semibold">{t('resume.base')}</span>
                     <span>{resumeData.base}</span>
                   </div>
                   <div className="flex justify-between border-b border-outline-variant/10 pb-2">
-                    <span className="font-semibold">Availability</span>
+                    <span className="font-semibold">{t('resume.availability')}</span>
                     <span className="text-primary font-bold">{resumeData.availability}</span>
                   </div>
                 </div>
@@ -178,7 +181,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                 <div className="flex items-center gap-2 mb-3 border-b border-outline-variant/10 pb-2">
                   <Target className="w-4 h-4 text-primary" />
                   <h3 className="font-display text-xs uppercase tracking-wider text-on-surface font-bold print:text-black">
-                    Executive Summary
+                    {t('resume.summary')}
                   </h3>
                 </div>
                 <p className="font-sans text-xs text-on-surface-variant leading-relaxed print:text-black">
@@ -191,7 +194,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                 <div className="flex items-center gap-2 mb-4 border-b border-outline-variant/10 pb-2">
                   <Award className="w-4 h-4 text-secondary" />
                   <h3 className="font-display text-xs uppercase tracking-wider text-on-surface font-bold print:text-black">
-                    Certifications
+                    {t('resume.certifications')}
                   </h3>
                 </div>
                 <div className="space-y-3">
@@ -210,7 +213,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                       </div>
                     ))
                   ) : (
-                    <p className="font-sans text-xs text-on-surface-variant">No certifications added.</p>
+                    <p className="font-sans text-xs text-on-surface-variant">{t('resume.certifications.empty')}</p>
                   )}
                 </div>
               </div>
@@ -220,7 +223,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                 <div className="flex items-center gap-2 mb-4 border-b border-outline-variant/10 pb-2">
                   <GraduationCap className="w-4 h-4 text-tertiary" />
                   <h3 className="font-display text-xs uppercase tracking-wider text-on-surface font-bold print:text-black">
-                    Education
+                    {t('resume.education')}
                   </h3>
                 </div>
                 <div className="space-y-4">
@@ -230,9 +233,9 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                       : [
                           {
                             id: 'edu-default',
-                            degree: resumeData.educationDegree || 'B.S. Computer Science & Engineering',
-                            school: resumeData.educationSchool || 'University of California, Berkeley',
-                            details: resumeData.educationDetails || 'Graduated with Honors • GPA: 3.82/4.00'
+                            degree: resumeData.educationDegree || t('education.degree.fallback'),
+                            school: resumeData.educationSchool || t('education.school.fallback'),
+                            details: resumeData.educationDetails || t('education.details.fallback')
                           }
                         ];
                     return displayEducation.map((edu) => (
@@ -260,7 +263,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                 <div className="flex items-center gap-2 mb-6 border-b border-outline-variant/10 pb-3">
                   <Briefcase className="w-4.5 h-4.5 text-primary" />
                   <h3 className="font-display text-sm uppercase tracking-wider text-on-surface font-bold print:text-black">
-                    Professional Experience
+                    {t('resume.experience')}
                   </h3>
                 </div>
 
@@ -294,7 +297,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                       </div>
                     ))
                   ) : (
-                    <p className="font-sans text-xs text-on-surface-variant">No professional experience added.</p>
+                    <p className="font-sans text-xs text-on-surface-variant">{t('resume.experience.empty')}</p>
                   )}
                 </div>
               </div>
@@ -305,7 +308,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                   <div className="flex items-center gap-2 text-primary font-bold">
                     <Terminal className="w-4 h-4 animate-pulse" />
                     <span className="font-mono text-xs uppercase tracking-wider">
-                      Interactive CV Query shell
+                      {t('resume.terminal.title')}
                     </span>
                   </div>
                   <div className="flex gap-1.5">
@@ -320,7 +323,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                   {terminalHistory.map((log, index) => (
                     <div key={index} className="space-y-1">
                       <div className="text-on-surface-variant flex gap-1.5">
-                        <span className="text-primary font-bold select-none">recruiter@dev_shell:~$</span>
+                        <span className="text-primary font-bold select-none">{t('resume.terminal.prompt')}</span>
                         <span>{log.q}</span>
                       </div>
                       <div className="text-green-400 pl-4">
@@ -337,7 +340,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                   </div>
                   <input
                     type="text"
-                    placeholder="Ask about skills, certified, TechNexus, or relocate..."
+                    placeholder={t('resume.terminal.placeholder')}
                     value={terminalInput}
                     onChange={(e) => setTerminalInput(e.target.value)}
                     className="flex-1 bg-surface-container-low px-2 py-3 font-mono text-xs text-on-surface outline-none"
@@ -347,7 +350,7 @@ export default function ResumeDashboard({ onClose }: ResumeDashboardProps) {
                     type="submit"
                     className="px-4 bg-primary text-on-primary font-mono text-xs font-bold hover:opacity-95 cursor-pointer active:scale-95 transition-all"
                   >
-                    Run
+                    {t('resume.terminal.run')}
                   </button>
                 </form>
               </div>

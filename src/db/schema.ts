@@ -5,9 +5,13 @@ export const devShellSchema = pgSchema('dev_shell_portfolio');
 export const projects = devShellSchema.table('projects', {
   id: text('id').primaryKey(),
   title: text('title').notNull(),
+  titleEn: text('title_en'),
   description: text('description').notNull(),
+  descriptionEn: text('description_en'),
   challenges: text('challenges').notNull(),
+  challengesEn: text('challenges_en'),
   solutions: text('solutions').notNull(),
+  solutionsEn: text('solutions_en'),
   image: text('image').notNull(),
   tags: jsonb('tags').$type<string[]>().notNull(),
   year: text('year').notNull(),
@@ -18,6 +22,7 @@ export const projects = devShellSchema.table('projects', {
   codeSnippet: text('code_snippet').notNull(),
   codeLanguage: text('code_language').notNull(),
   businessImpact: text('business_impact'),
+  businessImpactEn: text('business_impact_en'),
 });
 
 export const contactMessages = devShellSchema.table('contact_messages', {
@@ -31,26 +36,37 @@ export const contactMessages = devShellSchema.table('contact_messages', {
 });
 
 export const resumeData = devShellSchema.table('resume_data', {
-  id: text('id').primaryKey(), // 'main'
+  id: text('id').primaryKey(),
   name: text('name').notNull(),
   title: text('title').notNull(),
+  titleEn: text('title_en'),
   email: text('email').notNull(),
   base: text('base').notNull(),
   availability: text('availability').notNull(),
+  availabilityEn: text('availability_en'),
   summaryStandard: text('summary_standard').notNull(),
+  summaryStandardEn: text('summary_standard_en'),
   summaryArchitect: text('summary_architect').notNull(),
+  summaryArchitectEn: text('summary_architect_en'),
   summaryFullstack: text('summary_fullstack').notNull(),
+  summaryFullstackEn: text('summary_fullstack_en'),
   certifications: jsonb('certifications').$type<any[]>().notNull(),
   experience: jsonb('experience').$type<any[]>().notNull(),
   educationDegree: text('education_degree'),
+  educationDegreeEn: text('education_degree_en'),
   educationSchool: text('education_school'),
+  educationSchoolEn: text('education_school_en'),
   educationDetails: text('education_details'),
+  educationDetailsEn: text('education_details_en'),
   education: jsonb('education').$type<any[]>(),
   pdfBase64: text('pdf_base64'),
   pdfFileName: text('pdf_file_name'),
   heroSubtitle: text('hero_subtitle'),
+  heroSubtitleEn: text('hero_subtitle_en'),
   workstoryDescription: text('workstory_description'),
+  workstoryDescriptionEn: text('workstory_description_en'),
   contactDescription: text('contact_description'),
+  contactDescriptionEn: text('contact_description_en'),
   telemetryStats: jsonb('telemetry_stats').$type<any[]>(),
   skills: jsonb('skills').$type<any[]>(),
 });

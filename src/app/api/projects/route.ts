@@ -14,9 +14,13 @@ export async function GET() {
         await db.insert(projects).values({
           id: proj.id,
           title: proj.title,
+          titleEn: proj.titleEn || null,
           description: proj.description,
+          descriptionEn: proj.descriptionEn || null,
           challenges: proj.challenges,
+          challengesEn: proj.challengesEn || null,
           solutions: proj.solutions,
+          solutionsEn: proj.solutionsEn || null,
           image: proj.image,
           tags: proj.tags,
           year: proj.year,
@@ -27,6 +31,7 @@ export async function GET() {
           codeSnippet: proj.codeSnippet,
           codeLanguage: proj.codeLanguage,
           businessImpact: proj.businessImpact || null,
+          businessImpactEn: proj.businessImpactEn || null,
         });
       }
       return NextResponse.json(PROJECTS);
@@ -48,9 +53,13 @@ export async function POST(request: Request) {
     
     const values = {
       title: body.title,
+      titleEn: body.titleEn || null,
       description: body.description,
+      descriptionEn: body.descriptionEn || null,
       challenges: body.challenges,
+      challengesEn: body.challengesEn || null,
       solutions: body.solutions,
+      solutionsEn: body.solutionsEn || null,
       image: body.image,
       tags: body.tags || [],
       year: body.year,
@@ -61,6 +70,7 @@ export async function POST(request: Request) {
       codeSnippet: body.codeSnippet,
       codeLanguage: body.codeLanguage,
       businessImpact: body.businessImpact || null,
+      businessImpactEn: body.businessImpactEn || null,
     };
 
     if (result.length === 0) {

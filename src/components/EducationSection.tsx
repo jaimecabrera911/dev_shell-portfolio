@@ -9,8 +9,10 @@ import { useState, useEffect, useRef } from 'react';
 import { getResumeData } from '../utils/storage';
 import { GraduationCap, BookOpen } from 'lucide-react';
 import { EducationItem } from '../types';
+import { useLocale } from '../contexts/LocaleContext';
 
 export default function EducationSection() {
+  const { t } = useLocale();
   const [education, setEducation] = useState<EducationItem[]>([]);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -149,9 +151,9 @@ export default function EducationSection() {
   const defaultEducation = [
     {
       id: 'edu-default-1',
-      degree: 'B.S. Computer Science & Engineering',
-      school: 'University of California, Berkeley',
-      details: 'Graduated with Honors • GPA: 3.82/4.00'
+      degree: t('education.degree.fallback'),
+      school: t('education.school.fallback'),
+      details: t('education.details.fallback')
     }
   ];
 
@@ -168,13 +170,13 @@ export default function EducationSection() {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 mb-12">
         <div className="max-w-xl">
-          <span className="font-mono text-xs uppercase tracking-widest text-primary block mb-2">Qualifications</span>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface mb-3">Education</h2>
+          <span className="font-mono text-xs uppercase tracking-widest text-primary block mb-2">{t('education.eyebrow')}</span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface mb-3">{t('education.title')}</h2>
           <p className="font-sans text-on-surface-variant text-sm md:text-base leading-relaxed">
-            Academic credentials, degrees, and educational foundation in computer science and engineering.
+            {t('education.description')}
           </p>
           <span className="text-[10px] font-mono text-primary/80 mt-2.5 block uppercase tracking-wider">
-            ⚡ Click/Tap marquee to pause. Drag with mouse or swipe to scroll manually.
+            ⚡ {t('education.hint')}
           </span>
         </div>
       </div>

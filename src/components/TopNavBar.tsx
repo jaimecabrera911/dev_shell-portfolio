@@ -8,18 +8,20 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 import TypewriterLogo from './TypewriterLogo';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface TopNavBarProps {
   onResumeClick: () => void;
 }
 
 export default function TopNavBar({ onResumeClick }: TopNavBarProps) {
+  const { locale, setLocale, t } = useLocale();
   const [activeSection, setActiveSection] = useState('projects');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['projects', 'stack', 'experience', 'contact'];
+      const sections = ['projects', 'stack', 'experience', 'education-section', 'contact'];
       let current = '';
 
       for (const section of sections) {
@@ -74,10 +76,11 @@ export default function TopNavBar({ onResumeClick }: TopNavBarProps) {
         {/* Desktop Navigation Links */}
         <div className="hidden md:flex items-center gap-8">
           {[
-            { id: 'projects', label: 'Projects' },
-            { id: 'stack', label: 'Stack' },
-            { id: 'experience', label: 'Experience' },
-            { id: 'contact', label: 'Contact' }
+            { id: 'projects', label: t('nav.projects') },
+            { id: 'stack', label: t('nav.stack') },
+            { id: 'experience', label: t('nav.experience') },
+            { id: 'education-section', label: t('nav.education') },
+            { id: 'contact', label: t('nav.contact') }
           ].map((item) => (
             <button
               key={item.id}
@@ -94,14 +97,23 @@ export default function TopNavBar({ onResumeClick }: TopNavBarProps) {
           ))}
         </div>
 
-        {/* Resume Button */}
-        <div className="hidden md:block">
+        {/* Resume Button + Language Toggle */}
+        <div className="hidden md:flex items-center gap-3">
+          <button
+            onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
+            className="inline-flex items-center gap-1 px-3 py-2 rounded-lg font-mono text-xs font-bold active:scale-95 transition-all hover:opacity-80 duration-150 cursor-pointer border border-outline-variant/40 bg-surface"
+            id="lang-toggle-btn"
+          >
+            <span className={locale === 'es' ? 'text-primary' : 'text-on-surface-variant'}>ES</span>
+            <span className="text-outline-variant/60">|</span>
+            <span className={locale === 'en' ? 'text-primary' : 'text-on-surface-variant'}>EN</span>
+          </button>
           <button
             onClick={onResumeClick}
             className="inline-flex items-center gap-1.5 bg-primary text-on-primary px-5 py-2 rounded-lg font-mono text-xs font-bold active:scale-95 transition-all hover:opacity-90 duration-150 cursor-pointer"
             id="nav-resume-btn"
           >
-            Resume
+            {t('nav.resume')}
             <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -124,10 +136,11 @@ export default function TopNavBar({ onResumeClick }: TopNavBarProps) {
         <div className="md:hidden border-b border-outline-variant/40 bg-background/95 backdrop-blur-xl px-6 py-4 space-y-4" id="mobile-menu-drawer">
           <div className="flex flex-col gap-3">
             {[
-              { id: 'projects', label: 'Projects' },
-              { id: 'stack', label: 'Stack' },
-              { id: 'experience', label: 'Experience' },
-              { id: 'contact', label: 'Contact' }
+              { id: 'projects', label: t('nav.projects') },
+              { id: 'stack', label: t('nav.stack') },
+              { id: 'experience', label: t('nav.experience') },
+              { id: 'education-section', label: t('nav.education') },
+              { id: 'contact', label: t('nav.contact') }
             ].map((item) => (
               <button
                 key={item.id}
@@ -141,17 +154,28 @@ export default function TopNavBar({ onResumeClick }: TopNavBarProps) {
                 {item.label}
               </button>
             ))}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                setMobileMenuOpen(false);
-                onResumeClick();
-              }}
-              className="inline-flex justify-center items-center gap-1.5 bg-primary text-on-primary py-2.5 rounded-lg font-mono text-sm font-bold mt-2 cursor-pointer"
-            >
-              Resume
-              <ArrowUpRight className="w-4 h-4" />
-            </button>
+            <div className="flex gap-3 mt-2">
+              <button
+                onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
+                className="inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg font-mono text-xs font-bold active:scale-95 transition-all hover:opacity-80 duration-150 cursor-pointer border border-outline-variant/40 bg-surface flex-1"
+                id="mobile-lang-toggle-btn"
+              >
+                <span className={locale === 'es' ? 'text-primary' : 'text-on-surface-variant'}>ES</span>
+                <span className="text-outline-variant/60">|</span>
+                <span className={locale === 'en' ? 'text-primary' : 'text-on-surface-variant'}>EN</span>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMobileMenuOpen(false);
+                  onResumeClick();
+                }}
+                className="inline-flex justify-center items-center gap-1.5 bg-primary text-on-primary py-2.5 rounded-lg font-mono text-sm font-bold flex-1 cursor-pointer"
+              >
+                {t('nav.resume')}
+                <ArrowUpRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       )}

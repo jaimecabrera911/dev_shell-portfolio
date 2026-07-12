@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Briefcase, Building, Code2, Rocket, Trophy, GraduationCap, Cpu, Globe, Server, Database, Users, Sparkles } from 'lucide-react';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface AnimatedNumberProps {
   value: number;
@@ -128,6 +129,7 @@ const fallbackStats = [
 ];
 
 export default function StatsCounter({ stats }: StatsCounterProps) {
+  const { t } = useLocale();
   // Use custom stats from database if available, otherwise fall back to default stats
   const displayStats = (Array.isArray(stats) && stats.length > 0) ? stats : fallbackStats;
 
@@ -153,7 +155,7 @@ export default function StatsCounter({ stats }: StatsCounterProps) {
                     <IconComponent className="w-5 h-5" />
                   </div>
                   <span className="font-mono text-[9px] uppercase tracking-wider text-on-surface-variant font-bold opacity-60">
-                    Telemetry Node
+                    {t('stats.telemetry')}
                   </span>
                 </div>
 

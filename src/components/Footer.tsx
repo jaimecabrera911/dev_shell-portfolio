@@ -8,8 +8,10 @@
 import { ArrowUp, Terminal } from 'lucide-react';
 import Link from 'next/link';
 import TypewriterLogo from './TypewriterLogo';
+import { useLocale } from '../contexts/LocaleContext';
 
 export default function Footer() {
+  const { t, locale } = useLocale();
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -34,9 +36,9 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="flex gap-6" id="footer-links-group">
             {[
-              { href: '#', label: 'GitHub' },
-              { href: '#', label: 'LinkedIn' },
-              { href: '#', label: 'Twitter' },
+              { href: '#', label: t('contact.github') },
+              { href: '#', label: t('contact.linkedin') },
+              { href: '#', label: t('contact.twitter') },
             ].map((link) => (
               <a
                 key={link.label}
@@ -60,7 +62,7 @@ export default function Footer() {
           </div>
 
           <p className="font-mono text-[10px] text-on-surface-variant">
-            © 2026 JaiCab. Built for performance.
+            © 2026 JaiCab. {locale === 'es' ? 'Construido para el rendimiento.' : 'Built for performance.'}
           </p>
 
           <button

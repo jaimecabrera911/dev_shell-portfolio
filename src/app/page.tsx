@@ -12,13 +12,14 @@ import ContactForm from '../components/ContactForm';
 import Footer from '../components/Footer';
 import ResumeDashboard from '../components/ResumeDashboard';
 import { getResumeData, DEFAULT_RESUME_DATA } from '../utils/storage';
+import { useLocale } from '../contexts/LocaleContext';
 
 export default function Home() {
   const [showResume, setShowResume] = useState(false);
   const [resumeData, setResumeData] = useState(DEFAULT_RESUME_DATA);
+  const { locale } = useLocale();
 
   useEffect(() => {
-    // Only call getResumeData once mounted on client
     getResumeData()
       .then(setResumeData)
       .catch((err) => console.error('Error loading resume:', err));
@@ -34,38 +35,70 @@ export default function Home() {
     };
   }, []);
 
+  const localizedResume = { ...resumeData };
+  if (locale === 'en') {
+    localizedResume.title = resumeData.titleEn || resumeData.title;
+    localizedResume.availability = resumeData.availabilityEn || resumeData.availability;
+    localizedResume.heroSubtitle = resumeData.heroSubtitleEn || resumeData.heroSubtitle;
+    localizedResume.workstoryDescription = resumeData.workstoryDescriptionEn || resumeData.workstoryDescription;
+    localizedResume.contactDescription = resumeData.contactDescriptionEn || resumeData.contactDescription;
+    localizedResume.summaryStandard = resumeData.summaryStandardEn || resumeData.summaryStandard;
+    localizedResume.summaryArchitect = resumeData.summaryArchitectEn || resumeData.summaryArchitect;
+    localizedResume.summaryFullstack = resumeData.summaryFullstackEn || resumeData.summaryFullstack;
+    localizedResume.educationDegree = resumeData.educationDegreeEn || resumeData.educationDegree;
+    localizedResume.educationSchool = resumeData.educationSchoolEn || resumeData.educationSchool;
+    localizedResume.educationDetails = resumeData.educationDetailsEn || resumeData.educationDetails;
+    if (resumeData.experience) {
+      localizedResume.experience = resumeData.experience.map((exp) => ({
+        ...exp,
+        role: exp.roleEn || exp.role,
+        bulletPoints: exp.bulletPointsEn || exp.bulletPoints,
+      }));
+    }
+    if (resumeData.education) {
+      localizedResume.education = resumeData.education.map((edu) => ({
+        ...edu,
+        degree: edu.degreeEn || edu.degree,
+        school: edu.schoolEn || edu.school,
+        details: edu.detailsEn || edu.details,
+      }));
+    }
+    if (resumeData.telemetryStats) {
+      localizedResume.telemetryStats = resumeData.telemetryStats.map((stat) => ({
+        ...stat,
+        label: stat.labelEn || stat.label,
+        description: stat.descriptionEn || stat.description,
+      }));
+    }
+  }
+
   return (
     <div className="bg-background text-on-surface font-sans selection:bg-primary-container selection:text-on-primary-container min-h-screen relative overflow-x-hidden flex flex-col justify-between">
-      {/* Dynamic Background Noise/Mesh decoration */}
       <div className="absolute top-0 left-0 right-0 h-[1000px] bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none -z-10" />
 
-      {/* Navigation Header */}
       <TopNavBar onResumeClick={() => setShowResume(true)} />
 
-      {/* Main Sections */}
       <main className="flex-1">
         <Hero 
           onResumeClick={() => setShowResume(true)} 
-          pdfBase64={resumeData.pdfBase64} 
-          pdfFileName={resumeData.pdfFileName} 
-          name={resumeData.name}
-          title={resumeData.title}
-          availability={resumeData.availability}
-          certifications={resumeData.certifications}
-          subtitle={resumeData.heroSubtitle}
+          pdfBase64={localizedResume.pdfBase64} 
+          pdfFileName={localizedResume.pdfFileName} 
+          name={localizedResume.name}
+          title={localizedResume.title}
+          availability={localizedResume.availability}
+          certifications={localizedResume.certifications}
+          subtitle={localizedResume.heroSubtitle}
         />
-        <TechMarquee skills={resumeData.skills} />
-        <StatsCounter stats={resumeData.telemetryStats} />
+        <TechMarquee skills={localizedResume.skills} />
+        <StatsCounter stats={localizedResume.telemetryStats} />
         <FeaturedWorks />
         <ExperienceTimeline />
         <EducationSection />
         <ContactForm />
       </main>
 
-      {/* Footer */}
       <Footer />
 
-      {/* CV / Hoja de Vida Dashboard Overlay */}
       {showResume && (
         <ResumeDashboard onClose={() => setShowResume(false)} />
       )}

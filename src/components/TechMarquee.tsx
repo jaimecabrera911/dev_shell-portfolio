@@ -6,6 +6,7 @@
  */
  
 import { useState } from 'react';
+import { useLocale } from '../contexts/LocaleContext';
 import { TECH_STACK } from '../data';
 import { TechItem } from '../types';
 import { 
@@ -92,6 +93,7 @@ interface TechCardProps {
 
 function TechCard({ tech, idx }: TechCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const { t } = useLocale();
   const isCustomColor = tech.color && tech.color.trim() !== '';
   const deviconClass = getDeviconClass(tech.icon);
   const finalClass = isCustomColor ? deviconClass.replace('colored', '') : deviconClass;
@@ -114,7 +116,7 @@ function TechCard({ tech, idx }: TechCardProps) {
       <span className="font-mono text-sm text-on-surface font-medium">{tech.name}</span>
       {tech.isCore && (
         <span className="text-[9px] font-mono bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded uppercase font-semibold">
-          Core
+          {t('tech.core')}
         </span>
       )}
     </div>
@@ -126,6 +128,7 @@ export interface TechMarqueeProps {
 }
 
 export default function TechMarquee({ skills }: TechMarqueeProps) {
+  const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<'all' | 'frontend' | 'backend' | 'database' | 'devops'>('all');
 
   const stackSource = skills && skills.length > 0 ? skills : TECH_STACK;
@@ -139,18 +142,18 @@ export default function TechMarquee({ skills }: TechMarqueeProps) {
       <div className="max-w-7xl mx-auto px-6 mb-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
-            <span className="font-mono text-xs uppercase tracking-widest text-primary block mb-2">Core Technologies</span>
-            <h3 className="font-display text-2xl md:text-3xl font-bold text-on-surface">Skill Ecosystem</h3>
+            <span className="font-mono text-xs uppercase tracking-widest text-primary block mb-2">{t('tech.eyebrow')}</span>
+            <h3 className="font-display text-2xl md:text-3xl font-bold text-on-surface">{t('tech.title')}</h3>
           </div>
 
           {/* Interactive filter tabs */}
           <div className="flex flex-wrap gap-2" id="tech-filters">
             {[
-              { id: 'all', label: 'All Stack', icon: Layers },
-              { id: 'frontend', label: 'Frontend', icon: Cpu },
-              { id: 'backend', label: 'Backend', icon: Database },
-              { id: 'database', label: 'Databases', icon: HardDrive },
-              { id: 'devops', label: 'Cloud / DevOps', icon: Layers }
+              { id: 'all', label: t('tech.filter.all'), icon: Layers },
+              { id: 'frontend', label: t('tech.filter.frontend'), icon: Cpu },
+              { id: 'backend', label: t('tech.filter.backend'), icon: Database },
+              { id: 'database', label: t('tech.filter.databases'), icon: HardDrive },
+              { id: 'devops', label: t('tech.filter.cloud'), icon: Layers }
             ].map((tab) => {
               const Icon = tab.icon;
               return (

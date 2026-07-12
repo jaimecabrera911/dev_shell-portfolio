@@ -9,8 +9,11 @@ import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Mail, MapPin, Github, Linkedin, Twitter, Send, Terminal, CheckCircle } from 'lucide-react';
 import { ContactMessage } from '../types';
 import { saveContactMessage, getResumeData } from '../utils/storage';
+import { useLocale } from '../contexts/LocaleContext';
 
 export default function ContactForm() {
+  const { t } = useLocale();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('New Project Inquiry');
@@ -25,6 +28,8 @@ export default function ContactForm() {
   const [contactDesc, setContactDesc] = useState('I am always open to discussing new engineering projects, robust cloud architectures, collaboration opportunities, or being part of your technical vision.');
 
   useEffect(() => {
+    setContactDesc(t('contact.description.fallback'));
+
     getResumeData()
       .then((data) => {
         if (data.email) setContactEmail(data.email);
@@ -62,7 +67,7 @@ export default function ContactForm() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!name || !email || !message) {
-      alert('Please fill out all fields.');
+      alert(t('contact.form.validation'));
       return;
     }
 
@@ -106,8 +111,8 @@ export default function ContactForm() {
         {/* Left Column: Details and Socials */}
         <div className="flex flex-col justify-between space-y-8">
           <div>
-            <span className="font-mono text-xs uppercase tracking-widest text-primary block mb-2">Let's Connect</span>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface mb-4">Get In Touch</h2>
+            <span className="font-mono text-xs uppercase tracking-widest text-primary block mb-2">{t('contact.eyebrow')}</span>
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-on-surface mb-4">{t('contact.title')}</h2>
             <p className="font-sans text-on-surface-variant text-sm md:text-base leading-relaxed">
               {contactDesc}
             </p>
@@ -120,7 +125,7 @@ export default function ContactForm() {
                 <Mail className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">Email Base</p>
+                <p className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">{t('contact.email.label')}</p>
                 <a href={`mailto:${contactEmail}`} className="font-sans text-sm md:text-base font-semibold text-on-surface hover:text-primary transition-colors">
                   {contactEmail}
                 </a>
@@ -132,7 +137,7 @@ export default function ContactForm() {
                 <MapPin className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">Geographic Base</p>
+                <p className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider">{t('contact.location.label')}</p>
                 <p className="font-sans text-sm md:text-base font-semibold text-on-surface">{contactLocation}</p>
               </div>
             </div>
@@ -141,9 +146,9 @@ export default function ContactForm() {
           {/* Social Links */}
           <div className="flex flex-wrap gap-3 pt-4" id="social-links-container">
             {[
-              { href: '#', icon: Github, label: 'GitHub' },
-              { href: '#', icon: Linkedin, label: 'LinkedIn' },
-              { href: '#', icon: Twitter, label: 'X / Twitter' }
+              { href: '#', icon: Github, label: t('contact.github') },
+              { href: '#', icon: Linkedin, label: t('contact.linkedin') },
+              { href: '#', icon: Twitter, label: t('contact.twitter') }
             ].map((soc) => {
               const Icon = soc.icon;
               return (
@@ -168,11 +173,11 @@ export default function ContactForm() {
           <form onSubmit={handleSubmit} className="space-y-4" id="contact-input-form">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider block px-1">Name</label>
+                <label className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider block px-1">{t('contact.form.name')}</label>
                 <input
                   type="text"
                   required
-                  placeholder="John Doe"
+                  placeholder={t('contact.form.name.placeholder')}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-surface-container border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-lg p-3 text-sm text-on-surface transition-all outline-none"
@@ -180,11 +185,11 @@ export default function ContactForm() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider block px-1">Email</label>
+                <label className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider block px-1">{t('contact.form.email')}</label>
                 <input
                   type="email"
                   required
-                  placeholder="john@example.com"
+                  placeholder={t('contact.form.email.placeholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-surface-container border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-lg p-3 text-sm text-on-surface transition-all outline-none"
@@ -194,26 +199,26 @@ export default function ContactForm() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider block px-1">Subject</label>
+              <label className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider block px-1">{t('contact.form.subject')}</label>
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 className="w-full bg-surface-container border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-lg p-3 text-sm text-on-surface transition-all outline-none cursor-pointer"
                 id="contact-subject-select"
               >
-                <option>New Project Inquiry</option>
-                <option>Collaboration Opportunity</option>
-                <option>General Feedback</option>
-                <option>Other</option>
+                <option>{t('contact.form.subject.new')}</option>
+                <option>{t('contact.form.subject.collab')}</option>
+                <option>{t('contact.form.subject.feedback')}</option>
+                <option>{t('contact.form.subject.other')}</option>
               </select>
             </div>
 
             <div className="space-y-1.5">
-              <label className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider block px-1">Message</label>
+              <label className="font-mono text-[10px] text-on-surface-variant uppercase tracking-wider block px-1">{t('contact.form.message')}</label>
               <textarea
                 required
                 rows={4}
-                placeholder="Tell me about your project..."
+                placeholder={t('contact.form.message.placeholder')}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 className="w-full bg-surface-container border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-lg p-3 text-sm text-on-surface transition-all outline-none resize-none"
@@ -228,7 +233,7 @@ export default function ContactForm() {
               id="contact-submit-btn"
             >
               <Send className="w-4 h-4" />
-              {sending ? 'Initiating Cloud Ingress...' : 'Send Message'}
+              {sending ? t('contact.form.sending') : t('contact.form.send')}
             </button>
           </form>
 
@@ -239,7 +244,7 @@ export default function ContactForm() {
                 <div className="flex items-center gap-1.5">
                   <Terminal className="w-3.5 h-3.5 text-primary" />
                   <span className="font-mono text-[10px] text-on-surface-variant uppercase font-bold">
-                    SMTP Handshake Log Stream
+                    {t('contact.form.terminal.title')}
                   </span>
                 </div>
                 <div className="flex gap-1">
@@ -260,10 +265,10 @@ export default function ContactForm() {
                   <div key={msg.id} className="text-green-400 border-t border-outline-variant/10 pt-2 mt-2">
                     <div className="flex items-center gap-1 font-semibold">
                       <CheckCircle className="w-3.5 h-3.5 text-green-400" />
-                      Payload delivered! Receipt UUID: {msg.id}
+                      {t('contact.form.terminal.sent')} {msg.id}
                     </div>
                     <div className="text-[9px] text-on-surface-variant mt-1 italic pl-4">
-                      Sender: {msg.name} ({msg.email}) | Topic: {msg.subject}
+                      {t('contact.form.terminal.sender')} {msg.name} ({msg.email}) | {t('contact.form.terminal.topic')} {msg.subject}
                     </div>
                   </div>
                 ))}
