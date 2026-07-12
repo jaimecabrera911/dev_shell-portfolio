@@ -7,6 +7,7 @@ import TechMarquee from '../components/TechMarquee';
 import StatsCounter from '../components/StatsCounter';
 import FeaturedWorks from '../components/FeaturedWorks';
 import ExperienceTimeline from '../components/ExperienceTimeline';
+import EducationSection from '../components/EducationSection';
 import ContactForm from '../components/ContactForm';
 import Footer from '../components/Footer';
 import ResumeDashboard from '../components/ResumeDashboard';
@@ -56,6 +57,7 @@ export default function Home() {
         <StatsCounter stats={resumeData.telemetryStats} />
         <FeaturedWorks />
         <ExperienceTimeline />
+        <EducationSection />
         <ContactForm />
       </main>
 
