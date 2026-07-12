@@ -11,6 +11,7 @@ import EducationSection from '../components/EducationSection';
 import ContactForm from '../components/ContactForm';
 import Footer from '../components/Footer';
 import ResumeDashboard from '../components/ResumeDashboard';
+import WhatsAppWidget from '../components/WhatsAppWidget';
 import { getResumeData, DEFAULT_RESUME_DATA } from '../utils/storage';
 import { useLocale } from '../contexts/LocaleContext';
 
@@ -102,6 +103,8 @@ export default function Home() {
       {showResume && (
         <ResumeDashboard onClose={() => setShowResume(false)} />
       )}
+
+      <WhatsAppWidget phoneNumber="5491100000000" />
     </div>
   );
 }
